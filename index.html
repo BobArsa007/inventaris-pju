@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WebGIS Inventarisasi Aset Jalan — Bobby</title>
+<title>WebGIS Inventarisasi Aset Jalan</title>
 
 <!-- Leaflet -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
@@ -14,28 +14,41 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
   :root {
-    --bg:        #0f1117;
-    --surface:   #181c27;
-    --surface2:  #1f2435;
-    --border:    #2a2f42;
-    --accent:    #f5a623;
-    --accent2:   #4fc3f7;
-    --pju:       #f5a623;
-    --rambu:     #ef5350;
-    --text:      #e8ecf4;
-    --muted:     #7a82a0;
-    --sidebar-w: 300px;
+    --bg:          #f4f6fb;
+    --surface:     #ffffff;
+    --surface2:    #f0f2f8;
+    --border:      #e2e6f0;
+    --border-mid:  #cbd2e6;
+    --text:        #18243d;
+    --text-sec:    #5b6b8a;
+    --text-muted:  #9aa5be;
+    --pju:         #f59e0b;
+    --pju-bg:      #fef3c7;
+    --pju-dark:    #92400e;
+    --rambu:       #ef4444;
+    --rambu-bg:    #fee2e2;
+    --rambu-dark:  #991b1b;
+    --accent:      #2563eb;
+    --accent-bg:   #dbeafe;
+    --accent-dark: #1e3a8a;
+    --sidebar-w:   320px;
+    --header-h:    60px;
+    --radius:      10px;
+    --radius-lg:   16px;
+    --shadow-sm:   0 1px 3px rgba(24,36,61,0.07), 0 1px 2px rgba(24,36,61,0.04);
+    --shadow:      0 4px 16px rgba(24,36,61,0.10), 0 1px 4px rgba(24,36,61,0.06);
+    --shadow-lg:   0 12px 40px rgba(24,36,61,0.14), 0 2px 8px rgba(24,36,61,0.08);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
     height: 100vh;
@@ -46,48 +59,114 @@
 
   /* ─── HEADER ─── */
   #header {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    height: 52px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
     flex-shrink: 0;
     z-index: 1000;
+    box-shadow: var(--shadow-sm);
   }
 
-  #header .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 15px;
-    letter-spacing: 0.04em;
-    color: var(--text);
+  .header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
   }
 
-  #header .logo span {
-    background: var(--accent);
-    color: #000;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+  .header-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+  }
+
+  .header-logo-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .header-title-group { line-height: 1.2; }
+
+  .header-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .header-subtitle {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
 
   #stats-bar {
     display: flex;
-    gap: 20px;
-    font-size: 12px;
-    color: var(--muted);
+    gap: 6px;
   }
 
-  .stat { display: flex; align-items: center; gap: 6px; }
-  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .stat strong { color: var(--text); font-weight: 500; }
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px 5px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: default;
+    transition: box-shadow 0.15s;
+  }
+
+  .stat-pill:hover { box-shadow: var(--shadow-sm); }
+
+  .stat-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .stat-pill .count {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 16px;
+  }
+
+  .stat-pill.pju  { background: var(--pju-bg); border-color: #fcd34d; color: var(--pju-dark); }
+  .stat-pill.rambu { background: var(--rambu-bg); border-color: #fca5a5; color: var(--rambu-dark); }
+
+  /* Copyright */
+  .copyright {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
 
   /* ─── MAIN LAYOUT ─── */
   #main {
@@ -106,169 +185,275 @@
     flex-shrink: 0;
     overflow: hidden;
     z-index: 500;
+    box-shadow: 2px 0 12px rgba(24,36,61,0.05);
   }
 
-  .sidebar-section {
-    padding: 14px 16px;
+  .sidebar-header {
+    padding: 18px 20px 14px;
     border-bottom: 1px solid var(--border);
   }
 
-  .sidebar-section h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 10px;
+  .sidebar-header h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    color: var(--text);
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+  }
+
+  /* Basemap tabs */
+  .basemap-tabs {
+    display: flex;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+
+  .basemap-tab {
+    flex: 1;
+    padding: 6px 0;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-sec);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .basemap-tab:hover { color: var(--text); }
+
+  .basemap-tab.active {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
   }
 
   /* Layer toggles */
-  .layer-toggle {
+  .layers-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .layer-chip {
+    flex: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 6px;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
     background: var(--surface2);
-    border: 1px solid var(--border);
-    transition: border-color 0.15s;
+    cursor: pointer;
+    transition: all 0.15s;
     user-select: none;
+    position: relative;
+    overflow: hidden;
   }
 
-  .layer-toggle:hover { border-color: var(--accent); }
-  .layer-toggle.active { border-color: var(--accent); }
+  .layer-chip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
 
-  .layer-toggle-left {
+  .layer-chip.pju-chip.active  { border-color: #fcd34d; background: #fffbeb; }
+  .layer-chip.rambu-chip.active{ border-color: #fca5a5; background: #fff5f5; }
+  .layer-chip:hover { box-shadow: var(--shadow-sm); }
+
+  .layer-chip-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .layer-icon {
-    width: 26px; height: 26px;
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
+    justify-content: center;
     font-size: 14px;
+    flex-shrink: 0;
   }
 
-  .layer-icon.pju { background: rgba(245,166,35,0.15); }
-  .layer-icon.rambu { background: rgba(239,83,80,0.15); }
+  .layer-chip.pju-chip  .layer-chip-icon { background: var(--pju-bg); }
+  .layer-chip.rambu-chip .layer-chip-icon { background: var(--rambu-bg); }
 
-  .toggle-switch {
-    width: 34px; height: 18px;
-    background: var(--border);
+  .layer-chip-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .layer-chip-sub {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .layer-chip-toggle {
+    margin-left: auto;
+    width: 30px;
+    height: 17px;
+    background: var(--border-mid);
     border-radius: 9px;
     position: relative;
     transition: background 0.2s;
     flex-shrink: 0;
   }
 
-  .toggle-switch.on { background: var(--accent); }
-  .toggle-switch.on.rambu-color { background: var(--rambu); }
-
-  .toggle-switch::after {
+  .layer-chip-toggle::after {
     content: '';
     position: absolute;
-    top: 3px; left: 3px;
-    width: 12px; height: 12px;
+    top: 2.5px;
+    left: 2.5px;
+    width: 12px;
+    height: 12px;
     background: #fff;
     border-radius: 50%;
-    transition: left 0.2s;
+    transition: left 0.18s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
 
-  .toggle-switch.on::after { left: 19px; }
+  .layer-chip.pju-chip.active   .layer-chip-toggle { background: var(--pju); }
+  .layer-chip.rambu-chip.active .layer-chip-toggle { background: var(--rambu); }
+  .layer-chip.active .layer-chip-toggle::after { left: 15.5px; }
 
-  .layer-count {
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--bg);
-    padding: 1px 6px;
-    border-radius: 10px;
+  /* ─── SEARCH ─── */
+  .search-wrap {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
   }
 
-  /* Basemap selector */
-  .basemap-btns {
-    display: flex;
-    gap: 6px;
+  .search-inner {
+    position: relative;
   }
 
-  .basemap-btn {
-    flex: 1;
-    padding: 7px 0;
-    border-radius: 7px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
+  .search-inner svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
   }
 
-  .basemap-btn:hover { border-color: var(--accent2); color: var(--text); }
-  .basemap-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(79,195,247,0.08); }
-
-  /* Search */
   #search-input {
     width: 100%;
-    padding: 8px 12px;
+    padding: 9px 12px 9px 34px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 13px;
     outline: none;
-    transition: border-color 0.15s;
+    transition: all 0.15s;
   }
 
-  #search-input:focus { border-color: var(--accent2); }
-  #search-input::placeholder { color: var(--muted); }
+  #search-input:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+  }
 
-  /* Ruas list */
+  #search-input::placeholder { color: var(--text-muted); }
+
+  /* ─── RUAS LIST ─── */
+  .ruas-list-header {
+    padding: 12px 20px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ruas-list-header span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  #ruas-list-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
   #ruas-list-wrap {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 10px;
+    padding: 4px 12px 12px;
   }
 
   #ruas-list-wrap::-webkit-scrollbar { width: 4px; }
   #ruas-list-wrap::-webkit-scrollbar-track { background: transparent; }
   #ruas-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  #ruas-list-wrap::-webkit-scrollbar-thumb:hover { background: var(--border-mid); }
 
   .ruas-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 7px 8px;
-    border-radius: 7px;
+    padding: 9px 10px;
+    border-radius: 9px;
     cursor: pointer;
-    font-size: 12px;
     transition: background 0.12s;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    gap: 8px;
+    border: 1px solid transparent;
   }
 
-  .ruas-item:hover { background: var(--surface2); }
-  .ruas-item.active { background: rgba(245,166,35,0.12); }
+  .ruas-item:hover { background: var(--surface2); border-color: var(--border); }
+
+  .ruas-item.active {
+    background: var(--accent-bg);
+    border-color: rgba(37,99,235,0.2);
+  }
 
   .ruas-no {
-    font-family: 'Syne', sans-serif;
-    font-size: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10.5px;
     font-weight: 700;
     color: var(--accent);
-    min-width: 30px;
-    margin-right: 6px;
+    min-width: 34px;
+    flex-shrink: 0;
+    background: var(--accent-bg);
+    text-align: center;
+    padding: 2px 5px;
+    border-radius: 5px;
+    letter-spacing: 0.02em;
+  }
+
+  .ruas-item.active .ruas-no {
+    background: rgba(37,99,235,0.15);
   }
 
   .ruas-street {
     flex: 1;
+    font-size: 12.5px;
     color: var(--text);
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -278,52 +463,156 @@
     display: flex;
     gap: 3px;
     flex-shrink: 0;
-    margin-left: 6px;
   }
 
   .ruas-badge {
-    font-size: 10px;
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-weight: 500;
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
   }
 
-  .ruas-badge.pju { background: rgba(245,166,35,0.15); color: var(--pju); }
-  .ruas-badge.rambu { background: rgba(239,83,80,0.15); color: var(--rambu); }
+  .ruas-badge.pju   { background: var(--pju-bg);   color: var(--pju-dark);   }
+  .ruas-badge.rambu { background: var(--rambu-bg);  color: var(--rambu-dark); }
 
   /* ─── MAP ─── */
-  /* FIX 2: Added height: 100% so Leaflet can calculate dimensions correctly */
-  #map {
+  #map-wrap {
     flex: 1;
-    height: 100%;
-    background: #0f1117;
+    position: relative;
+    overflow: hidden;
   }
+
+  #map {
+    width: 100%;
+    height: 100%;
+    background: #e8eef4;
+  }
+
+  /* ─── SELECTED RUAS LABEL (floating over map) ─── */
+  #ruas-label {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 900;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow);
+  }
+
+  #ruas-label-no {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  #ruas-label-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  #ruas-label-close {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-sec);
+    line-height: 1;
+    transition: background 0.12s;
+    flex-shrink: 0;
+  }
+
+  #ruas-label-close:hover { background: var(--border); }
+
+  /* ─── COUNT BADGE ─── */
+  #count-badge {
+    position: absolute;
+    bottom: 28px;
+    right: 16px;
+    z-index: 900;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--text-sec);
+    pointer-events: none;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #count-badge strong {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  #count-badge svg {
+    width: 14px; height: 14px;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ─── ATTRIBUTION FIX ─── */
+  .leaflet-bottom.leaflet-right { bottom: 28px; right: 170px; }
 
   /* ─── POPUP ─── */
   .leaflet-popup-content-wrapper {
     background: var(--surface) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
     padding: 0 !important;
     overflow: hidden;
-    min-width: 240px;
-    max-width: 280px;
+    min-width: 250px;
+    max-width: 290px;
   }
 
-  .leaflet-popup-tip-container { display: none; }
+  .leaflet-popup-tip-container { display: none !important; }
   .leaflet-popup-content { margin: 0 !important; width: 100% !important; }
+
   .leaflet-popup-close-button {
-    color: var(--muted) !important;
-    font-size: 18px !important;
-    top: 8px !important; right: 10px !important;
+    top: 8px !important;
+    right: 10px !important;
+    color: var(--text-muted) !important;
+    font-size: 20px !important;
+    font-weight: 400 !important;
     z-index: 10;
+    line-height: 1 !important;
+    background: rgba(255,255,255,0.9) !important;
+    border-radius: 5px !important;
+    width: 22px !important;
+    height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
-  .leaflet-popup-close-button:hover { color: var(--text) !important; }
 
   .popup-photo {
     width: 100%;
-    height: 180px;
+    height: 160px;
     object-fit: cover;
     display: block;
     background: var(--surface2);
@@ -331,80 +620,99 @@
 
   .popup-no-photo {
     width: 100%;
-    height: 100px;
-    background: var(--surface2);
+    height: 90px;
+    background: linear-gradient(135deg, var(--surface2), #e8eef9);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    color: var(--muted);
+    font-size: 30px;
+    color: var(--text-muted);
   }
 
   .popup-body {
-    padding: 12px 14px 14px;
+    padding: 13px 16px 16px;
   }
 
-  .popup-type-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    font-family: 'Syne', sans-serif;
-    letter-spacing: 0.08em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-bottom: 6px;
-  }
-
-  .popup-type-badge.PJU { background: rgba(245,166,35,0.2); color: var(--pju); }
-  .popup-type-badge.RAMBU { background: rgba(239,83,80,0.2); color: var(--rambu); }
-
-  .popup-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .popup-street {
-    font-size: 12px;
-    color: var(--muted);
+  .popup-header {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
-  .popup-ruas-no {
+  .popup-badge {
     font-size: 10px;
-    background: var(--border);
-    padding: 1px 5px;
-    border-radius: 3px;
-    color: var(--accent);
-    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 5px;
+  }
+
+  .popup-badge.PJU   { background: var(--pju-bg);   color: var(--pju-dark);   }
+  .popup-badge.RAMBU { background: var(--rambu-bg);  color: var(--rambu-dark); }
+
+  .popup-name {
+    font-family: 'Outfit', sans-serif;
     font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 7px;
+    line-height: 1.3;
   }
 
-  /* ─── CLUSTER OVERRIDES ─── */
-  .marker-cluster-small,
-  .marker-cluster-medium,
-  .marker-cluster-large {
-    background-clip: padding-box;
+  .popup-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-sec);
   }
 
-  .marker-cluster-small { background-color: rgba(245,166,35,0.25) !important; }
-  .marker-cluster-small div { background-color: rgba(245,166,35,0.85) !important; color: #000 !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+  .popup-ruas-tag {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--accent-bg);
+    color: var(--accent-dark);
+    padding: 2px 6px;
+    border-radius: 5px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
 
-  .marker-cluster-medium { background-color: rgba(245,166,35,0.2) !important; }
-  .marker-cluster-medium div { background-color: rgba(245,166,35,0.8) !important; color: #000 !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+  /* ─── MARKER CLUSTER ─── */
+  .marker-cluster-small div,
+  .marker-cluster-medium div,
+  .marker-cluster-large div {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+  }
 
-  .marker-cluster-large { background-color: rgba(245,166,35,0.15) !important; }
-  .marker-cluster-large div { background-color: rgba(245,166,35,0.7) !important; color: #000 !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+  .marker-cluster-small  { background-color: rgba(245,158,11,0.18) !important; }
+  .marker-cluster-small div  { background-color: rgba(245,158,11,0.88) !important; color: #fff !important; }
+  .marker-cluster-medium { background-color: rgba(245,158,11,0.14) !important; }
+  .marker-cluster-medium div { background-color: rgba(245,158,11,0.80) !important; color: #fff !important; }
+  .marker-cluster-large  { background-color: rgba(245,158,11,0.10) !important; }
+  .marker-cluster-large div  { background-color: rgba(245,158,11,0.72) !important; color: #fff !important; }
 
-  /* ─── MAP CONTROLS ─── */
+  /* ─── LEAFLET CONTROLS ─── */
+  .leaflet-control-zoom {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden;
+    box-shadow: var(--shadow) !important;
+  }
+
   .leaflet-control-zoom a {
     background: var(--surface) !important;
-    color: var(--text) !important;
+    color: var(--text-sec) !important;
     border-color: var(--border) !important;
+    font-size: 16px !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    transition: background 0.12s, color 0.12s;
   }
 
   .leaflet-control-zoom a:hover {
@@ -412,141 +720,142 @@
     color: var(--accent) !important;
   }
 
-  /* ─── COUNT BADGE ─── */
-  #count-badge {
-    position: absolute;
-    bottom: 24px;
-    right: 14px;
-    z-index: 999;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-size: 12px;
-    color: var(--muted);
-    pointer-events: none;
-  }
-
-  #count-badge strong { color: var(--text); }
-
-  /* Sidebar toggle for mobile */
+  /* Mobile sidebar toggle */
   #sidebar-toggle {
     display: none;
     position: absolute;
-    top: 60px;
-    left: 8px;
+    top: 16px;
+    left: 16px;
     z-index: 1000;
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--text);
-    border-radius: 8px;
-    width: 36px; height: 36px;
-    align-items: center; justify-content: center;
+    border-radius: var(--radius);
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 18px;
+    box-shadow: var(--shadow);
   }
 
-  @media (max-width: 640px) {
-    #sidebar { position: absolute; left: -300px; top: 52px; bottom: 0; z-index: 900; transition: left 0.25s; }
+  @media (max-width: 680px) {
+    #sidebar {
+      position: absolute;
+      left: -340px;
+      top: var(--header-h);
+      bottom: 0;
+      z-index: 900;
+      transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: var(--shadow-lg);
+    }
     #sidebar.open { left: 0; }
     #sidebar-toggle { display: flex; }
-    :root { --sidebar-w: 280px; }
+    :root { --sidebar-w: 300px; }
+    .header-right .stat-pill { display: none; }
+    .copyright { display: none; }
+    #ruas-label { top: auto; bottom: 70px; left: 60px; }
   }
 
-  /* Highlight selected ruas */
-  .ruas-selected-label {
-    position: absolute;
-    top: 60px;
-    left: calc(var(--sidebar-w) + 10px);
-    z-index: 999;
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 12px;
-    color: var(--accent);
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    pointer-events: none;
-    display: none;
+  /* Loading shimmer */
+  @keyframes shimmer {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
   }
-
+  .loading { animation: shimmer 1.4s ease-in-out infinite; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ─── HEADER ─── -->
 <div id="header">
-  <div class="logo">
-    <span>BOBBY</span>
-    WebGIS Inventarisasi Aset Jalan
+  <div class="header-left">
+    <div class="header-logo-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+    </div>
+    <div class="header-title-group">
+      <div class="header-title">WebGIS Inventarisasi Aset Jalan</div>
+      <div class="header-subtitle">Sistem Informasi Geografis Aset Infrastruktur</div>
+    </div>
   </div>
-  <div id="stats-bar">
-    <div class="stat">
-      <div class="stat-dot" style="background:var(--pju)"></div>
-      <div>PJU <strong id="stat-pju">—</strong></div>
+
+  <div class="header-right">
+    <div id="stats-bar">
+      <div class="stat-pill pju">
+        <div class="stat-dot" style="background:var(--pju)"></div>
+        PJU
+        <span class="count" id="stat-pju">—</span>
+      </div>
+      <div class="stat-pill rambu">
+        <div class="stat-dot" style="background:var(--rambu)"></div>
+        Rambu
+        <span class="count" id="stat-rambu">—</span>
+      </div>
     </div>
-    <div class="stat">
-      <div class="stat-dot" style="background:var(--rambu)"></div>
-      <div>Rambu <strong id="stat-rambu">—</strong></div>
-    </div>
-    <div class="stat" style="display:none" id="stat-ruas-wrap">
-      <div>Ruas <strong id="stat-ruas">—</strong></div>
-    </div>
+    <span class="copyright">&copy; Bobby</span>
   </div>
 </div>
 
-<!-- MAIN -->
+<!-- ─── MAIN ─── -->
 <div id="main">
 
-  <!-- SIDEBAR -->
+  <!-- ─── SIDEBAR ─── -->
   <div id="sidebar">
 
-    <!-- Layer toggles -->
-    <div class="sidebar-section">
-      <h3>Layer</h3>
-      <div class="layer-toggle active" id="toggle-pju" onclick="toggleLayer('pju')">
-        <div class="layer-toggle-left">
-          <div class="layer-icon pju">💡</div>
-          <div>
-            <div>PJU</div>
-            <div style="font-size:11px;color:var(--muted);font-weight:400">Penerangan Jalan Umum</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="layer-count" id="count-pju">—</span>
-          <div class="toggle-switch on" id="sw-pju"></div>
-        </div>
+    <div class="sidebar-header">
+      <h2>Peta Kontrol</h2>
+
+      <!-- Basemap tabs -->
+      <div class="basemap-tabs">
+        <button class="basemap-tab active" id="btn-osm" onclick="setBasemap('osm')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Peta Jalan
+        </button>
+        <button class="basemap-tab" id="btn-satellite" onclick="setBasemap('satellite')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          Satelit
+        </button>
       </div>
 
-      <div class="layer-toggle active" id="toggle-rambu" onclick="toggleLayer('rambu')">
-        <div class="layer-toggle-left">
-          <div class="layer-icon rambu">🚦</div>
+      <!-- Layer toggles -->
+      <div class="layers-row">
+        <div class="layer-chip pju-chip active" id="chip-pju" onclick="toggleLayer('pju')">
+          <div class="layer-chip-icon">💡</div>
           <div>
-            <div>Rambu</div>
-            <div style="font-size:11px;color:var(--muted);font-weight:400">Rambu Lalu Lintas</div>
+            <div class="layer-chip-label">PJU <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'Outfit',sans-serif" id="count-pju-chip">—</span></div>
+            <div class="layer-chip-sub">Penerangan</div>
           </div>
+          <div class="layer-chip-toggle" id="sw-pju"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="layer-count" id="count-rambu">—</span>
-          <div class="toggle-switch on rambu-color" id="sw-rambu"></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Basemap -->
-    <div class="sidebar-section">
-      <h3>Basemap</h3>
-      <div class="basemap-btns">
-        <button class="basemap-btn active" id="btn-osm" onclick="setBasemap('osm')">🗺 Street</button>
-        <button class="basemap-btn" id="btn-satellite" onclick="setBasemap('satellite')">🛰 Satellite</button>
+        <div class="layer-chip rambu-chip active" id="chip-rambu" onclick="toggleLayer('rambu')">
+          <div class="layer-chip-icon">🚦</div>
+          <div>
+            <div class="layer-chip-label">Rambu <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'Outfit',sans-serif" id="count-rambu-chip">—</span></div>
+            <div class="layer-chip-sub">Lalu Lintas</div>
+          </div>
+          <div class="layer-chip-toggle" id="sw-rambu"></div>
+        </div>
       </div>
     </div>
 
     <!-- Search -->
-    <div class="sidebar-section">
-      <h3>Filter Ruas</h3>
-      <input type="text" id="search-input" placeholder="Cari nama jalan…" oninput="filterRuas(this.value)">
+    <div class="search-wrap">
+      <div class="search-inner">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Cari nama jalan atau nomor ruas…" oninput="filterRuas(this.value)">
+      </div>
+    </div>
+
+    <!-- Ruas list header -->
+    <div class="ruas-list-header">
+      <span>Daftar Ruas</span>
+      <span id="ruas-list-count">—</span>
     </div>
 
     <!-- Ruas list -->
@@ -556,35 +865,48 @@
 
   </div><!-- /sidebar -->
 
-  <!-- MAP -->
-  <div style="flex:1;position:relative">
+  <!-- ─── MAP AREA ─── -->
+  <div id="map-wrap">
     <div id="map"></div>
-    <div id="count-badge">Menampilkan <strong id="visible-count">—</strong> titik</div>
-    <div id="selected-ruas-label" class="ruas-selected-label"></div>
+
+    <!-- Selected ruas label -->
+    <div id="ruas-label">
+      <span id="ruas-label-no"></span>
+      <span id="ruas-label-name"></span>
+      <div id="ruas-label-close" onclick="selectRuas(null)" title="Tampilkan semua">×</div>
+    </div>
+
+    <!-- Visible count badge -->
+    <div id="count-badge">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2C8 2 4.5 5 3 9a12 12 0 0 0 0 6c1.5 4 5 7 9 7s7.5-3 9-7a12 12 0 0 0 0-6C19.5 5 16 2 12 2z"/></svg>
+      <strong id="visible-count">—</strong> titik ditampilkan
+    </div>
   </div>
 
 </div><!-- /main -->
 
-<!-- Mobile sidebar toggle -->
+<!-- Mobile toggle -->
 <button id="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
 
 <script src="data.js"></script>
 <script>
-// ─── MAP SETUP ────────────────────────────────────────────────
+// ─── MAP INIT ─────────────────────────────────────────────────
 const map = L.map('map', {
   center: [-7.6433, 110.8366],
   zoom: 13,
-  zoomControl: true
+  zoomControl: true,
+  attributionControl: true
 });
 
-// Basemaps
+map.zoomControl.setPosition('bottomright');
+
 const basemaps = {
   osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
     maxZoom: 19
   }),
   satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '© Esri, Maxar, GeoEye',
+    attribution: '&copy; Esri, Maxar, GeoEye',
     maxZoom: 19
   })
 };
@@ -594,122 +916,123 @@ let currentBasemap = 'osm';
 
 // ─── ICONS ────────────────────────────────────────────────────
 function makeIcon(type) {
-  const color = type === 'PJU' ? '#f5a623' : '#ef5350';
-  const emoji = type === 'PJU' ? '💡' : '🚦';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="34" viewBox="0 0 28 34">
-    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.5)"/></filter>
-    <path filter="url(#s)" d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 20 14 20s14-9.5 14-20C28 6.27 21.73 0 14 0z" fill="${color}"/>
-    <circle cx="14" cy="13" r="8" fill="rgba(255,255,255,0.15)"/>
-    <text x="14" y="18" text-anchor="middle" font-size="11">${emoji}</text>
+  const isPJU = type === 'PJU';
+  const bg    = isPJU ? '#f59e0b' : '#ef4444';
+  const emoji = isPJU ? '💡' : '🚦';
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="38" viewBox="0 0 30 38">
+    <defs>
+      <filter id="sh${type}" x="-30%" y="-20%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="rgba(0,0,0,0.25)" flood-opacity="1"/>
+      </filter>
+    </defs>
+    <path filter="url(#sh${type})"
+      d="M15 1C7.82 1 2 6.82 2 14c0 8.28 11.09 20.5 12.36 21.9a.87.87 0 0 0 1.28 0C16.91 34.5 28 22.28 28 14 28 6.82 22.18 1 15 1z"
+      fill="${bg}" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <circle cx="15" cy="14" r="9" fill="rgba(255,255,255,0.15)"/>
+    <text x="15" y="19" text-anchor="middle" font-size="12">${emoji}</text>
   </svg>`;
+
   return L.divIcon({
     html: svg,
-    iconSize: [28, 34],
-    iconAnchor: [14, 34],
-    popupAnchor: [0, -34],
+    iconSize: [30, 38],
+    iconAnchor: [15, 38],
+    popupAnchor: [0, -38],
     className: ''
   });
 }
 
 const icons = { PJU: makeIcon('PJU'), RAMBU: makeIcon('RAMBU') };
 
-// ─── LAYERS ───────────────────────────────────────────────────
+// ─── CLUSTERS ─────────────────────────────────────────────────
 const clusters = {
-  pju:   L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 }),
-  rambu: L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 })
+  pju:   L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 55, spiderfyOnMaxZoom: true }),
+  rambu: L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 55, spiderfyOnMaxZoom: true })
 };
 
 const layerVisible = { pju: true, rambu: true };
 let activeRuas = null;
 
-// Build per-ruas index
+// ─── BY-RUAS INDEX ────────────────────────────────────────────
 const byRuas = {};
 FEATURES.forEach(f => {
-  const key = f.ruas_no;
-  if (!byRuas[key]) byRuas[key] = [];
-  byRuas[key].push(f);
+  if (!byRuas[f.ruas_no]) byRuas[f.ruas_no] = [];
+  byRuas[f.ruas_no].push(f);
 });
 
+// ─── POPUP BUILDER ────────────────────────────────────────────
 function buildPopup(f) {
-  const imgHtml = f.img
+  const media = f.img
     ? `<img class="popup-photo" src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.style.display='none'">`
     : `<div class="popup-no-photo">${f.type === 'PJU' ? '💡' : '🚦'}</div>`;
 
   return `
-    ${imgHtml}
+    ${media}
     <div class="popup-body">
-      <div class="popup-type-badge ${f.type}">${f.type}</div>
+      <div class="popup-header">
+        <span class="popup-badge ${f.type}">${f.type}</span>
+      </div>
       <div class="popup-name">${f.name}</div>
-      <div class="popup-street">
-        <span class="popup-ruas-no">${f.ruas_no}</span>
-        ${f.street}
+      <div class="popup-meta">
+        <span class="popup-ruas-tag">${f.ruas_no}</span>
+        <span>${f.street}</span>
       </div>
     </div>`;
 }
 
+// ─── LOAD MARKERS ─────────────────────────────────────────────
 function loadMarkers(featureList) {
   clusters.pju.clearLayers();
   clusters.rambu.clearLayers();
 
   featureList.forEach(f => {
     const m = L.marker([f.lat, f.lon], { icon: icons[f.type] });
-    m.bindPopup(buildPopup(f), { maxWidth: 280, className: '' });
-    const key = f.type.toLowerCase();
-    clusters[key].addLayer(m);
+    m.bindPopup(buildPopup(f), { maxWidth: 290 });
+    clusters[f.type.toLowerCase()].addLayer(m);
   });
 
   updateCounts(featureList);
 }
 
 function refreshMap() {
-  const featureList = activeRuas
+  const list = activeRuas
     ? FEATURES.filter(f => f.ruas_no === activeRuas)
     : FEATURES;
+  loadMarkers(list);
 
-  loadMarkers(featureList);
-
-  // Add/remove from map
-  ['pju', 'rambu'].forEach(key => {
-    if (layerVisible[key]) {
-      if (!map.hasLayer(clusters[key])) map.addLayer(clusters[key]);
-    } else {
-      if (map.hasLayer(clusters[key])) map.removeLayer(clusters[key]);
-    }
+  ['pju', 'rambu'].forEach(k => {
+    if (layerVisible[k]) { if (!map.hasLayer(clusters[k])) map.addLayer(clusters[k]); }
+    else                  { if (map.hasLayer(clusters[k]))  map.removeLayer(clusters[k]); }
   });
 }
 
-function updateCounts(featureList) {
-  const pju = featureList.filter(f => f.type === 'PJU').length;
-  const rambu = featureList.filter(f => f.type === 'RAMBU').length;
-  document.getElementById('count-pju').textContent = pju;
-  document.getElementById('count-rambu').textContent = rambu;
-  document.getElementById('stat-pju').textContent = pju;
+function updateCounts(list) {
+  const pju   = list.filter(f => f.type === 'PJU').length;
+  const rambu = list.filter(f => f.type === 'RAMBU').length;
+  document.getElementById('stat-pju').textContent   = pju;
   document.getElementById('stat-rambu').textContent = rambu;
-  document.getElementById('visible-count').textContent = pju + rambu;
+  document.getElementById('count-pju-chip').textContent   = pju;
+  document.getElementById('count-rambu-chip').textContent = rambu;
+  document.getElementById('visible-count').textContent    = pju + rambu;
 }
 
 // ─── LAYER TOGGLES ────────────────────────────────────────────
 function toggleLayer(key) {
   layerVisible[key] = !layerVisible[key];
-  document.getElementById(`sw-${key}`).classList.toggle('on', layerVisible[key]);
-  document.getElementById(`toggle-${key}`).classList.toggle('active', layerVisible[key]);
-  if (layerVisible[key]) {
-    map.addLayer(clusters[key]);
-  } else {
-    map.removeLayer(clusters[key]);
-  }
+  const chip = document.getElementById(`chip-${key}`);
+  chip.classList.toggle('active', layerVisible[key]);
+  if (layerVisible[key]) map.addLayer(clusters[key]);
+  else                   map.removeLayer(clusters[key]);
 }
 
 // ─── BASEMAP ──────────────────────────────────────────────────
-// FIX 1: Use a lookup map so 'satellite' correctly finds id="btn-satellite"
 function setBasemap(name) {
   map.removeLayer(basemaps[currentBasemap]);
   basemaps[name].addTo(map);
   basemaps[name].bringToBack();
   currentBasemap = name;
-  document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
-  const btnIds = { osm: 'btn-osm', satellite: 'btn-satellite' };
-  document.getElementById(btnIds[name]).classList.add('active');
+  document.querySelectorAll('.basemap-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(name === 'osm' ? 'btn-osm' : 'btn-satellite').classList.add('active');
 }
 
 // ─── RUAS LIST ────────────────────────────────────────────────
@@ -717,86 +1040,79 @@ function buildRuasList(list) {
   const container = document.getElementById('ruas-list');
   container.innerHTML = '';
 
-  // Add "All" item
-  const allItem = document.createElement('div');
-  allItem.className = 'ruas-item' + (activeRuas === null ? ' active' : '');
-  allItem.innerHTML = `
-    <span class="ruas-no">ALL</span>
+  document.getElementById('ruas-list-count').textContent = list.length + (activeRuas ? '' : '+1') + ' ruas';
+
+  // "All" entry
+  const allEl = document.createElement('div');
+  allEl.className = 'ruas-item' + (activeRuas === null ? ' active' : '');
+  allEl.innerHTML = `
+    <span class="ruas-no" style="background:var(--accent-bg);color:var(--accent);min-width:34px">ALL</span>
     <span class="ruas-street">Semua Ruas</span>
     <span class="ruas-badges">
       <span class="ruas-badge pju">${FEATURES.filter(f=>f.type==='PJU').length}</span>
       <span class="ruas-badge rambu">${FEATURES.filter(f=>f.type==='RAMBU').length}</span>
     </span>`;
-  allItem.addEventListener('click', () => selectRuas(null));
-  container.appendChild(allItem);
+  allEl.addEventListener('click', () => selectRuas(null));
+  container.appendChild(allEl);
 
   list.forEach(r => {
-    const feats = byRuas[r.no] || [];
-    const pjuCount = feats.filter(f => f.type === 'PJU').length;
-    const rambuCount = feats.filter(f => f.type === 'RAMBU').length;
+    const feats     = byRuas[r.no] || [];
+    const pjuCnt   = feats.filter(f => f.type === 'PJU').length;
+    const rambuCnt = feats.filter(f => f.type === 'RAMBU').length;
 
-    const item = document.createElement('div');
-    item.className = 'ruas-item' + (activeRuas === r.no ? ' active' : '');
-    item.dataset.ruasNo = r.no;
-    item.innerHTML = `
+    const el = document.createElement('div');
+    el.className = 'ruas-item' + (activeRuas === r.no ? ' active' : '');
+    el.dataset.ruasNo = r.no;
+    el.innerHTML = `
       <span class="ruas-no">${r.no}</span>
       <span class="ruas-street" title="${r.street}">${r.street}</span>
       <span class="ruas-badges">
-        ${pjuCount ? `<span class="ruas-badge pju">${pjuCount}</span>` : ''}
-        ${rambuCount ? `<span class="ruas-badge rambu">${rambuCount}</span>` : ''}
+        ${pjuCnt   ? `<span class="ruas-badge pju">${pjuCnt}</span>`   : ''}
+        ${rambuCnt ? `<span class="ruas-badge rambu">${rambuCnt}</span>` : ''}
       </span>`;
-    item.addEventListener('click', () => selectRuas(r.no, r.street));
-    container.appendChild(item);
+    el.addEventListener('click', () => selectRuas(r.no, r.street));
+    container.appendChild(el);
   });
 }
 
 function filterRuas(query) {
   const q = query.trim().toLowerCase();
-  const filtered = q
+  buildRuasList(q
     ? RUAS_LIST.filter(r => r.street.toLowerCase().includes(q) || r.no.includes(q))
-    : RUAS_LIST;
-  buildRuasList(filtered);
+    : RUAS_LIST
+  );
 }
 
 function selectRuas(ruasNo, streetName) {
   activeRuas = ruasNo;
 
-  // Update active state in list
   document.querySelectorAll('.ruas-item').forEach(el => {
-    if (ruasNo === null) {
-      el.classList.toggle('active', el.dataset.ruasNo === undefined);
-    } else {
-      el.classList.toggle('active', el.dataset.ruasNo === ruasNo);
-    }
+    el.classList.toggle('active',
+      ruasNo === null ? el.dataset.ruasNo === undefined : el.dataset.ruasNo === ruasNo
+    );
   });
 
-  // Show label
-  const label = document.getElementById('selected-ruas-label');
+  const label = document.getElementById('ruas-label');
   if (ruasNo) {
-    label.style.display = 'block';
-    label.textContent = `Ruas ${ruasNo} — ${streetName}`;
-    document.getElementById('stat-ruas-wrap').style.display = 'flex';
-    document.getElementById('stat-ruas').textContent = ruasNo;
+    document.getElementById('ruas-label-no').textContent   = ruasNo;
+    document.getElementById('ruas-label-name').textContent = streetName;
+    label.style.display = 'flex';
 
-    // Fly to ruas bounds
     const feats = byRuas[ruasNo] || [];
-    if (feats.length > 0) {
-      const lats = feats.map(f => f.lat);
-      const lons = feats.map(f => f.lon);
-      const bounds = L.latLngBounds(
-        [Math.min(...lats) - 0.001, Math.min(...lons) - 0.001],
-        [Math.max(...lats) + 0.001, Math.max(...lons) + 0.001]
+    if (feats.length) {
+      const lats = feats.map(f => f.lat), lons = feats.map(f => f.lon);
+      map.flyToBounds(
+        [[Math.min(...lats)-.001, Math.min(...lons)-.001],
+         [Math.max(...lats)+.001, Math.max(...lons)+.001]],
+        { padding: [48, 48], duration: 0.8 }
       );
-      map.flyToBounds(bounds, { padding: [40, 40], duration: 0.8 });
     }
   } else {
     label.style.display = 'none';
-    document.getElementById('stat-ruas-wrap').style.display = 'none';
     map.flyTo([-7.6433, 110.8366], 13, { duration: 0.8 });
   }
 
   refreshMap();
-  // Close mobile sidebar
   document.getElementById('sidebar').classList.remove('open');
 }
 
