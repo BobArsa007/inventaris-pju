@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS Inventarisasi Aset Jalan — Bobby</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- Marker Cluster -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #0f1117;
+    --surface:   #181c27;
+    --surface2:  #1f2435;
+    --border:    #2a2f42;
+    --accent:    #f5a623;
+    --accent2:   #4fc3f7;
+    --pju:       #f5a623;
+    --rambu:     #ef5350;
+    --text:      #e8ecf4;
+    --muted:     #7a82a0;
+    --sidebar-w: 300px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 1000;
+  }
+
+  #header .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #header .logo span {
+    background: var(--accent);
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  #stats-bar {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .stat { display: flex; align-items: center; gap: 6px; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .stat strong { color: var(--text); font-weight: 500; }
+
+  /* ─── MAIN LAYOUT ─── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    z-index: 500;
+  }
+
+  .sidebar-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-section h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* Layer toggles */
+  .layer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: border-color 0.15s;
+    user-select: none;
+  }
+
+  .layer-toggle:hover { border-color: var(--accent); }
+  .layer-toggle.active { border-color: var(--accent); }
+
+  .layer-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .layer-icon {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .layer-icon.pju { background: rgba(245,166,35,0.15); }
+  .layer-icon.rambu { background: rgba(239,83,80,0.15); }
+
+  .toggle-switch {
+    width: 34px; height: 18px;
+    background: var(--border);
+    border-radius: 9px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch.on { background: var(--accent); }
+  .toggle-switch.on.rambu-color { background: var(--rambu); }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 12px; height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.2s;
+  }
+
+  .toggle-switch.on::after { left: 19px; }
+
+  .layer-count {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  /* Basemap selector */
+  .basemap-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .basemap-btn {
+    flex: 1;
+    padding: 7px 0;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .basemap-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .basemap-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(79,195,247,0.08); }
+
+  /* Search */
+  #search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  #search-input:focus { border-color: var(--accent2); }
+  #search-input::placeholder { color: var(--muted); }
+
+  /* Ruas list */
+  #ruas-list-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 10px;
+  }
+
+  #ruas-list-wrap::-webkit-scrollbar { width: 4px; }
+  #ruas-list-wrap::-webkit-scrollbar-track { background: transparent; }
+  #ruas-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .ruas-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.12s;
+    margin-bottom: 2px;
+  }
+
+  .ruas-item:hover { background: var(--surface2); }
+  .ruas-item.active { background: rgba(245,166,35,0.12); }
+
+  .ruas-no {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 30px;
+    margin-right: 6px;
+  }
+
+  .ruas-street {
+    flex: 1;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ruas-badges {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-left: 6px;
+  }
+
+  .ruas-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .ruas-badge.pju { background: rgba(245,166,35,0.15); color: var(--pju); }
+  .ruas-badge.rambu { background: rgba(239,83,80,0.15); color: var(--rambu); }
+
+  /* ─── MAP ─── */
+  #map {
+    flex: 1;
+    background: #0f1117;
+  }
+
+  /* ─── POPUP ─── */
+  .leaflet-popup-content-wrapper {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    padding: 0 !important;
+    overflow: hidden;
+    min-width: 240px;
+    max-width: 280px;
+  }
+
+  .leaflet-popup-tip-container { display: none; }
+  .leaflet-popup-content { margin: 0 !important; width: 100% !important; }
+  .leaflet-popup-close-button {
+    color: var(--muted) !important;
+    font-size: 18px !important;
+    top: 8px !important; right: 10px !important;
+    z-index: 10;
+  }
+  .leaflet-popup-close-button:hover { color: var(--text) !important; }
+
+  .popup-photo {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    background: var(--surface2);
+  }
+
+  .popup-no-photo {
+    width: 100%;
+    height: 100px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--muted);
+  }
+
+  .popup-body {
+    padding: 12px 14px 14px;
+  }
+
+  .popup-type-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+
+  .popup-type-badge.PJU { background: rgba(245,166,35,0.2); color: var(--pju); }
+  .popup-type-badge.RAMBU { background: rgba(239,83,80,0.2); color: var(--rambu); }
+
+  .popup-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .popup-street {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .popup-ruas-no {
+    font-size: 10px;
+    background: var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+
+  /* ─── CLUSTER OVERRIDES ─── */
+  .marker-cluster-small,
+  .marker-cluster-medium,
+  .marker-cluster-large {
+    background-clip: padding-box;
+  }
+
+  .marker-cluster-small { background-color: rgba(245,166,35,0.25) !important; }
+  .marker-cluster-small div { background-color: rgba(245,166,35,0.85) !important; color: #000 !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  .marker-cluster-medium { background-color: rgba(245,166,35,0.2) !important; }
+  .marker-cluster-medium div { background-color: rgba(245,166,35,0.8) !important; color: #000 !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  .marker-cluster-large { background-color: rgba(245,166,35,0.15) !important; }
+  .marker-cluster-large div { background-color: rgba(245,166,35,0.7) !important; color: #000 !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  /* ─── MAP CONTROLS ─── */
+  .leaflet-control-zoom a {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+  }
+
+  .leaflet-control-zoom a:hover {
+    background: var(--surface2) !important;
+    color: var(--accent) !important;
+  }
+
+  /* ─── COUNT BADGE ─── */
+  #count-badge {
+    position: absolute;
+    bottom: 24px;
+    right: 14px;
+    z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  #count-badge strong { color: var(--text); }
+
+  /* Sidebar toggle for mobile */
+  #sidebar-toggle {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 8px;
+    z-index: 1000;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    width: 36px; height: 36px;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  @media (max-width: 640px) {
+    #sidebar { position: absolute; left: -300px; top: 52px; bottom: 0; z-index: 900; transition: left 0.25s; }
+    #sidebar.open { left: 0; }
+    #sidebar-toggle { display: flex; }
+    :root { --sidebar-w: 280px; }
+  }
+
+  /* Highlight selected ruas */
+  .ruas-selected-label {
+    position: absolute;
+    top: 60px;
+    left: calc(var(--sidebar-w) + 10px);
+    z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    pointer-events: none;
+    display: none;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="logo">
+    <span>BOBBY</span>
+    WebGIS Inventarisasi Aset Jalan
+  </div>
+  <div id="stats-bar">
+    <div class="stat">
+      <div class="stat-dot" style="background:var(--pju)"></div>
+      <div>PJU <strong id="stat-pju">—</strong></div>
+    </div>
+    <div class="stat">
+      <div class="stat-dot" style="background:var(--rambu)"></div>
+      <div>Rambu <strong id="stat-rambu">—</strong></div>
+    </div>
+    <div class="stat" style="display:none" id="stat-ruas-wrap">
+      <div>Ruas <strong id="stat-ruas">—</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+
+    <!-- Layer toggles -->
+    <div class="sidebar-section">
+      <h3>Layer</h3>
+      <div class="layer-toggle active" id="toggle-pju" onclick="toggleLayer('pju')">
+        <div class="layer-toggle-left">
+          <div class="layer-icon pju">💡</div>
+          <div>
+            <div>PJU</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:400">Penerangan Jalan Umum</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="layer-count" id="count-pju">—</span>
+          <div class="toggle-switch on" id="sw-pju"></div>
+        </div>
+      </div>
+
+      <div class="layer-toggle active" id="toggle-rambu" onclick="toggleLayer('rambu')">
+        <div class="layer-toggle-left">
+          <div class="layer-icon rambu">🚦</div>
+          <div>
+            <div>Rambu</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:400">Rambu Lalu Lintas</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="layer-count" id="count-rambu">—</span>
+          <div class="toggle-switch on rambu-color" id="sw-rambu"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basemap -->
+    <div class="sidebar-section">
+      <h3>Basemap</h3>
+      <div class="basemap-btns">
+        <button class="basemap-btn active" id="btn-osm" onclick="setBasemap('osm')">🗺 Street</button>
+        <button class="basemap-btn" id="btn-sat" onclick="setBasemap('satellite')">🛰 Satellite</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="sidebar-section">
+      <h3>Filter Ruas</h3>
+      <input type="text" id="search-input" placeholder="Cari nama jalan…" oninput="filterRuas(this.value)">
+    </div>
+
+    <!-- Ruas list -->
+    <div id="ruas-list-wrap">
+      <div id="ruas-list"></div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- MAP -->
+  <div style="flex:1;position:relative">
+    <div id="map"></div>
+    <div id="count-badge">Menampilkan <strong id="visible-count">—</strong> titik</div>
+    <div id="selected-ruas-label" class="ruas-selected-label"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Mobile sidebar toggle -->
+<button id="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<script src="data.js"></script>
+<script>
+// ─── MAP SETUP ────────────────────────────────────────────────
+const map = L.map('map', {
+  center: [-7.6433, 110.8366],
+  zoom: 13,
+  zoomControl: true
+});
+
+// Basemaps
+const basemaps = {
+  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }),
+  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri, Maxar, GeoEye',
+    maxZoom: 19
+  })
+};
+
+basemaps.osm.addTo(map);
+let currentBasemap = 'osm';
+
+// ─── ICONS ────────────────────────────────────────────────────
+function makeIcon(type) {
+  const color = type === 'PJU' ? '#f5a623' : '#ef5350';
+  const emoji = type === 'PJU' ? '💡' : '🚦';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="34" viewBox="0 0 28 34">
+    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.5)"/></filter>
+    <path filter="url(#s)" d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 20 14 20s14-9.5 14-20C28 6.27 21.73 0 14 0z" fill="${color}"/>
+    <circle cx="14" cy="13" r="8" fill="rgba(255,255,255,0.15)"/>
+    <text x="14" y="18" text-anchor="middle" font-size="11">${emoji}</text>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    iconSize: [28, 34],
+    iconAnchor: [14, 34],
+    popupAnchor: [0, -34],
+    className: ''
+  });
+}
+
+const icons = { PJU: makeIcon('PJU'), RAMBU: makeIcon('RAMBU') };
+
+// ─── LAYERS ───────────────────────────────────────────────────
+const clusters = {
+  pju:   L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 }),
+  rambu: L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 })
+};
+
+const layerVisible = { pju: true, rambu: true };
+let activeRuas = null;
+
+// Build per-ruas index
+const byRuas = {};
+FEATURES.forEach(f => {
+  const key = f.ruas_no;
+  if (!byRuas[key]) byRuas[key] = [];
+  byRuas[key].push(f);
+});
+
+function buildPopup(f) {
+  const imgHtml = f.img
+    ? `<img class="popup-photo" src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.style.display='none'">`
+    : `<div class="popup-no-photo">${f.type === 'PJU' ? '💡' : '🚦'}</div>`;
+
+  return `
+    ${imgHtml}
+    <div class="popup-body">
+      <div class="popup-type-badge ${f.type}">${f.type}</div>
+      <div class="popup-name">${f.name}</div>
+      <div class="popup-street">
+        <span class="popup-ruas-no">${f.ruas_no}</span>
+        ${f.street}
+      </div>
+    </div>`;
+}
+
+function loadMarkers(featureList) {
+  clusters.pju.clearLayers();
+  clusters.rambu.clearLayers();
+
+  featureList.forEach(f => {
+    const m = L.marker([f.lat, f.lon], { icon: icons[f.type] });
+    m.bindPopup(buildPopup(f), { maxWidth: 280, className: '' });
+    const key = f.type.toLowerCase();
+    clusters[key].addLayer(m);
+  });
+
+  updateCounts(featureList);
+}
+
+function refreshMap() {
+  const featureList = activeRuas
+    ? FEATURES.filter(f => f.ruas_no === activeRuas)
+    : FEATURES;
+
+  loadMarkers(featureList);
+
+  // Add/remove from map
+  ['pju', 'rambu'].forEach(key => {
+    if (layerVisible[key]) {
+      if (!map.hasLayer(clusters[key])) map.addLayer(clusters[key]);
+    } else {
+      if (map.hasLayer(clusters[key])) map.removeLayer(clusters[key]);
+    }
+  });
+}
+
+function updateCounts(featureList) {
+  const pju = featureList.filter(f => f.type === 'PJU').length;
+  const rambu = featureList.filter(f => f.type === 'RAMBU').length;
+  document.getElementById('count-pju').textContent = pju;
+  document.getElementById('count-rambu').textContent = rambu;
+  document.getElementById('stat-pju').textContent = pju;
+  document.getElementById('stat-rambu').textContent = rambu;
+  document.getElementById('visible-count').textContent = pju + rambu;
+}
+
+// ─── LAYER TOGGLES ────────────────────────────────────────────
+function toggleLayer(key) {
+  layerVisible[key] = !layerVisible[key];
+  document.getElementById(`sw-${key}`).classList.toggle('on', layerVisible[key]);
+  document.getElementById(`toggle-${key}`).classList.toggle('active', layerVisible[key]);
+  if (layerVisible[key]) {
+    map.addLayer(clusters[key]);
+  } else {
+    map.removeLayer(clusters[key]);
+  }
+}
+
+// ─── BASEMAP ──────────────────────────────────────────────────
+function setBasemap(name) {
+  map.removeLayer(basemaps[currentBasemap]);
+  basemaps[name].addTo(map);
+  basemaps[name].bringToBack();
+  currentBasemap = name;
+  document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`btn-${name}`).classList.add('active');
+}
+
+// ─── RUAS LIST ────────────────────────────────────────────────
+function buildRuasList(list) {
+  const container = document.getElementById('ruas-list');
+  container.innerHTML = '';
+
+  // Add "All" item
+  const allItem = document.createElement('div');
+  allItem.className = 'ruas-item' + (activeRuas === null ? ' active' : '');
+  allItem.innerHTML = `
+    <span class="ruas-no">ALL</span>
+    <span class="ruas-street">Semua Ruas</span>
+    <span class="ruas-badges">
+      <span class="ruas-badge pju">${FEATURES.filter(f=>f.type==='PJU').length}</span>
+      <span class="ruas-badge rambu">${FEATURES.filter(f=>f.type==='RAMBU').length}</span>
+    </span>`;
+  allItem.addEventListener('click', () => selectRuas(null));
+  container.appendChild(allItem);
+
+  list.forEach(r => {
+    const feats = byRuas[r.no] || [];
+    const pjuCount = feats.filter(f => f.type === 'PJU').length;
+    const rambuCount = feats.filter(f => f.type === 'RAMBU').length;
+
+    const item = document.createElement('div');
+    item.className = 'ruas-item' + (activeRuas === r.no ? ' active' : '');
+    item.dataset.ruasNo = r.no;
+    item.innerHTML = `
+      <span class="ruas-no">${r.no}</span>
+      <span class="ruas-street" title="${r.street}">${r.street}</span>
+      <span class="ruas-badges">
+        ${pjuCount ? `<span class="ruas-badge pju">${pjuCount}</span>` : ''}
+        ${rambuCount ? `<span class="ruas-badge rambu">${rambuCount}</span>` : ''}
+      </span>`;
+    item.addEventListener('click', () => selectRuas(r.no, r.street));
+    container.appendChild(item);
+  });
+}
+
+function filterRuas(query) {
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? RUAS_LIST.filter(r => r.street.toLowerCase().includes(q) || r.no.includes(q))
+    : RUAS_LIST;
+  buildRuasList(filtered);
+}
+
+function selectRuas(ruasNo, streetName) {
+  activeRuas = ruasNo;
+
+  // Update active state in list
+  document.querySelectorAll('.ruas-item').forEach(el => {
+    if (ruasNo === null) {
+      el.classList.toggle('active', el.dataset.ruasNo === undefined);
+    } else {
+      el.classList.toggle('active', el.dataset.ruasNo === ruasNo);
+    }
+  });
+
+  // Show label
+  const label = document.getElementById('selected-ruas-label');
+  if (ruasNo) {
+    label.style.display = 'block';
+    label.textContent = `Ruas ${ruasNo} — ${streetName}`;
+    document.getElementById('stat-ruas-wrap').style.display = 'flex';
+    document.getElementById('stat-ruas').textContent = ruasNo;
+
+    // Fly to ruas bounds
+    const feats = byRuas[ruasNo] || [];
+    if (feats.length > 0) {
+      const lats = feats.map(f => f.lat);
+      const lons = feats.map(f => f.lon);
+      const bounds = L.latLngBounds(
+        [Math.min(...lats) - 0.001, Math.min(...lons) - 0.001],
+        [Math.max(...lats) + 0.001, Math.max(...lons) + 0.001]
+      );
+      map.flyToBounds(bounds, { padding: [40, 40], duration: 0.8 });
+    }
+  } else {
+    label.style.display = 'none';
+    document.getElementById('stat-ruas-wrap').style.display = 'none';
+    map.flyTo([-7.6433, 110.8366], 13, { duration: 0.8 });
+  }
+
+  refreshMap();
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+buildRuasList(RUAS_LIST);
+refreshMap();
+map.addLayer(clusters.pju);
+map.addLayer(clusters.rambu);
+</script>
+</body>
+</html>
