@@ -292,8 +292,10 @@
   .ruas-badge.rambu { background: rgba(239,83,80,0.15); color: var(--rambu); }
 
   /* ─── MAP ─── */
+  /* FIX 2: Added height: 100% so Leaflet can calculate dimensions correctly */
   #map {
     flex: 1;
+    height: 100%;
     background: #0f1117;
   }
 
@@ -537,7 +539,7 @@
       <h3>Basemap</h3>
       <div class="basemap-btns">
         <button class="basemap-btn active" id="btn-osm" onclick="setBasemap('osm')">🗺 Street</button>
-        <button class="basemap-btn" id="btn-sat" onclick="setBasemap('satellite')">🛰 Satellite</button>
+        <button class="basemap-btn" id="btn-satellite" onclick="setBasemap('satellite')">🛰 Satellite</button>
       </div>
     </div>
 
@@ -699,13 +701,15 @@ function toggleLayer(key) {
 }
 
 // ─── BASEMAP ──────────────────────────────────────────────────
+// FIX 1: Use a lookup map so 'satellite' correctly finds id="btn-satellite"
 function setBasemap(name) {
   map.removeLayer(basemaps[currentBasemap]);
   basemaps[name].addTo(map);
   basemaps[name].bringToBack();
   currentBasemap = name;
   document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`btn-${name}`).classList.add('active');
+  const btnIds = { osm: 'btn-osm', satellite: 'btn-satellite' };
+  document.getElementById(btnIds[name]).classList.add('active');
 }
 
 // ─── RUAS LIST ────────────────────────────────────────────────
