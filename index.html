@@ -324,55 +324,51 @@ body{
   box-shadow:0 8px 30px rgba(17,24,39,0.13),0 2px 8px rgba(17,24,39,0.07) !important;
   padding:0 !important;
   overflow:hidden;
-  width:280px !important;
+  width:272px !important;   /* fixed width so popup is always neat */
 }
 .leaflet-popup-tip-container{display:none !important;}
 .leaflet-popup-content{margin:0 !important;width:100% !important;}
 .leaflet-popup-close-button{
-  top:9px !important;right:9px !important;
-  color:rgba(255,255,255,0.9) !important;
+  top:8px !important;right:8px !important;
+  color:#fff !important;
   font-size:18px !important;font-weight:500 !important;
   z-index:10;line-height:1 !important;
   width:24px !important;height:24px !important;
   display:flex !important;align-items:center !important;justify-content:center !important;
-  background:rgba(0,0,0,0.25) !important;
+  background:rgba(0,0,0,0.3) !important;
   border-radius:6px !important;
   backdrop-filter:blur(4px) !important;
   -webkit-backdrop-filter:blur(4px) !important;
 }
 .leaflet-popup-close-button:hover{background:rgba(0,0,0,0.45) !important;color:#fff !important;}
 
-/* Photo area — FIXED proper display */
+/* ── POPUP PHOTO — natural full size, no crop ── */
 .pp-img-wrap{
   width:100%;
-  height:180px;
-  overflow:hidden;
   position:relative;
   background:var(--c-surf3);
-  display:flex;align-items:center;justify-content:center;
+  /* NO fixed height — let image set its own height */
+  line-height:0; /* remove inline-block gap */
 }
 .pp-img{
-  width:100%;height:100%;
-  object-fit:cover;object-position:center;
+  width:100%;
+  height:auto;          /* ← key: show full image at natural ratio */
   display:block;
+  max-height:280px;     /* cap very tall shots so popup stays usable */
+  object-fit:contain;   /* ← never crop — letterbox if needed */
+  object-position:center;
+  background:var(--c-surf3);
 }
 .pp-noimg{
-  width:100%;height:100%;
+  width:100%;height:110px;
   display:flex;align-items:center;justify-content:center;
   font-size:36px;
   background:linear-gradient(135deg,#f0f4ff,#e8edf8);
 }
-/* gradient overlay on photo for badge readability */
-.pp-img-wrap::after{
-  content:'';
-  position:absolute;inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,0.18) 0%,transparent 45%);
-  pointer-events:none;
-}
 
-.pp-body{padding:13px 15px 15px;}
+.pp-body{padding:12px 14px 14px;}
 
-.pp-meta-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.pp-meta-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
 .pp-badge{
   font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;
   letter-spacing:0.07em;padding:3px 8px;border-radius:5px;
@@ -387,14 +383,39 @@ body{
 }
 
 .pp-name{
-  font-family:'Manrope',sans-serif;font-size:14.5px;font-weight:800;
+  font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;
   color:var(--c-ink);line-height:1.3;margin-bottom:5px;
 }
 .pp-street{
   font-size:12px;color:var(--c-ink2);
   display:flex;align-items:flex-start;gap:5px;line-height:1.4;
+  margin-bottom:11px;
 }
-.pp-street-ico{margin-top:1px;flex-shrink:0;opacity:.6;font-size:11px;}
+.pp-street-ico{margin-top:1px;flex-shrink:0;opacity:.55;font-size:11px;}
+
+/* Google Maps button */
+.pp-gmaps{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;
+  padding:8px 0;
+  border-radius:var(--r);
+  border:1px solid var(--c-border2);
+  background:var(--c-surf2);
+  color:var(--c-ink2);
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+  text-decoration:none;
+  transition:all .14s;
+  cursor:pointer;
+}
+.pp-gmaps:hover{
+  background:#e8f0fe;
+  border-color:rgba(66,133,244,0.4);
+  color:#1a56db;
+}
+.pp-gmaps svg{width:14px;height:14px;flex-shrink:0;}
+.pp-gmaps-g{  /* google "G" color mark */
+  width:16px;height:16px;flex-shrink:0;
+}
 
 /* ══ CLUSTERS ════════════════════════════════════════════════ */
 .marker-cluster div{font-family:'Manrope',sans-serif !important;font-weight:800 !important;}
@@ -604,8 +625,10 @@ FEATURES.forEach(f=>{if(!byRuas[f.ruas_no])byRuas[f.ruas_no]=[];byRuas[f.ruas_no
 
 /* ── POPUP ───────────────────────────────────────────────── */
 function popup(f){
+  const gmapsUrl=`https://www.google.com/maps?q=${f.lat},${f.lon}&z=18`;
   const img=f.img
-    ?`<img class="pp-img" src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentNode.classList.add('err');this.style.display='none'">`
+    ?`<img class="pp-img" src="${f.img}" alt="${f.name}" loading="lazy"
+        onerror="this.parentNode.style.display='none'">`
     :`<div class="pp-noimg">${f.type==='PJU'?'💡':'🚦'}</div>`;
   return `
     <div class="pp-img-wrap">${img}</div>
@@ -619,6 +642,14 @@ function popup(f){
         <span class="pp-street-ico">📍</span>
         <span>${f.street}</span>
       </div>
+      <a class="pp-gmaps" href="${gmapsUrl}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        Buka di Google Maps
+      </a>
     </div>`;
 }
 
@@ -628,7 +659,7 @@ function loadMarkers(list){
   list.forEach(f=>{
     const k=f.type==='PJU'?'pju':'rmb';
     const m=L.marker([f.lat,f.lon],{icon:ICONS[f.type]});
-    m.bindPopup(popup(f),{maxWidth:280,className:''});
+    m.bindPopup(popup(f),{maxWidth:272,className:''});
     CL[k].addLayer(m);
   });
   updateCount(list);
