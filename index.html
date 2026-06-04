@@ -5,1122 +5,736 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WebGIS Inventarisasi Aset Jalan</title>
 
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
-<!-- Marker Cluster -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --bg:          #f4f6fb;
-    --surface:     #ffffff;
-    --surface2:    #f0f2f8;
-    --border:      #e2e6f0;
-    --border-mid:  #cbd2e6;
-    --text:        #18243d;
-    --text-sec:    #5b6b8a;
-    --text-muted:  #9aa5be;
-    --pju:         #f59e0b;
-    --pju-bg:      #fef3c7;
-    --pju-dark:    #92400e;
-    --rambu:       #ef4444;
-    --rambu-bg:    #fee2e2;
-    --rambu-dark:  #991b1b;
-    --accent:      #2563eb;
-    --accent-bg:   #dbeafe;
-    --accent-dark: #1e3a8a;
-    --sidebar-w:   320px;
-    --header-h:    60px;
-    --radius:      10px;
-    --radius-lg:   16px;
-    --shadow-sm:   0 1px 3px rgba(24,36,61,0.07), 0 1px 2px rgba(24,36,61,0.04);
-    --shadow:      0 4px 16px rgba(24,36,61,0.10), 0 1px 4px rgba(24,36,61,0.06);
-    --shadow-lg:   0 12px 40px rgba(24,36,61,0.14), 0 2px 8px rgba(24,36,61,0.08);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* ─── HEADER ─── */
-  #header {
-    height: var(--header-h);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    flex-shrink: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .header-logo-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #1d4ed8, #2563eb);
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-  }
-
-  .header-logo-icon svg {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: #fff;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .header-title-group { line-height: 1.2; }
-
-  .header-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.01em;
-  }
-
-  .header-subtitle {
-    font-size: 11.5px;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-top: 1px;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  #stats-bar {
-    display: flex;
-    gap: 6px;
-  }
-
-  .stat-pill {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 12px 5px 8px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    cursor: default;
-    transition: box-shadow 0.15s;
-  }
-
-  .stat-pill:hover { box-shadow: var(--shadow-sm); }
-
-  .stat-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .stat-pill .count {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    min-width: 16px;
-  }
-
-  .stat-pill.pju  { background: var(--pju-bg); border-color: #fcd34d; color: var(--pju-dark); }
-  .stat-pill.rambu { background: var(--rambu-bg); border-color: #fca5a5; color: var(--rambu-dark); }
-
-  /* Copyright */
-  .copyright {
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-  }
-
-  /* ─── MAIN LAYOUT ─── */
-  #main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  /* ─── SIDEBAR ─── */
-  #sidebar {
-    width: var(--sidebar-w);
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow: hidden;
-    z-index: 500;
-    box-shadow: 2px 0 12px rgba(24,36,61,0.05);
-  }
-
-  .sidebar-header {
-    padding: 18px 20px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .sidebar-header h2 {
-    font-family: 'Outfit', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-
-  /* Basemap tabs */
-  .basemap-tabs {
-    display: flex;
-    background: var(--surface2);
-    border-radius: var(--radius);
-    padding: 3px;
-    gap: 2px;
-    margin-bottom: 14px;
-    border: 1px solid var(--border);
-  }
-
-  .basemap-tab {
-    flex: 1;
-    padding: 6px 0;
-    border-radius: 7px;
-    border: none;
-    background: transparent;
-    color: var(--text-sec);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-  }
-
-  .basemap-tab:hover { color: var(--text); }
-
-  .basemap-tab.active {
-    background: var(--surface);
-    color: var(--accent);
-    box-shadow: var(--shadow-sm);
-    font-weight: 600;
-  }
-
-  /* Layer toggles */
-  .layers-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .layer-chip {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 12px;
-    border-radius: var(--radius);
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .layer-chip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-
-  .layer-chip.pju-chip.active  { border-color: #fcd34d; background: #fffbeb; }
-  .layer-chip.rambu-chip.active{ border-color: #fca5a5; background: #fff5f5; }
-  .layer-chip:hover { box-shadow: var(--shadow-sm); }
-
-  .layer-chip-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-
-  .layer-chip.pju-chip  .layer-chip-icon { background: var(--pju-bg); }
-  .layer-chip.rambu-chip .layer-chip-icon { background: var(--rambu-bg); }
-
-  .layer-chip-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.2;
-  }
-
-  .layer-chip-sub {
-    font-size: 10.5px;
-    color: var(--text-muted);
-    font-weight: 400;
-  }
-
-  .layer-chip-toggle {
-    margin-left: auto;
-    width: 30px;
-    height: 17px;
-    background: var(--border-mid);
-    border-radius: 9px;
-    position: relative;
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-
-  .layer-chip-toggle::after {
-    content: '';
-    position: absolute;
-    top: 2.5px;
-    left: 2.5px;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    border-radius: 50%;
-    transition: left 0.18s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  }
-
-  .layer-chip.pju-chip.active   .layer-chip-toggle { background: var(--pju); }
-  .layer-chip.rambu-chip.active .layer-chip-toggle { background: var(--rambu); }
-  .layer-chip.active .layer-chip-toggle::after { left: 15.5px; }
-
-  /* ─── SEARCH ─── */
-  .search-wrap {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .search-inner {
-    position: relative;
-  }
-
-  .search-inner svg {
-    position: absolute;
-    left: 11px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 15px;
-    height: 15px;
-    stroke: var(--text-muted);
-    stroke-width: 2;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    pointer-events: none;
-  }
-
-  #search-input {
-    width: 100%;
-    padding: 9px 12px 9px 34px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
-    outline: none;
-    transition: all 0.15s;
-  }
-
-  #search-input:focus {
-    border-color: var(--accent);
-    background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
-  }
-
-  #search-input::placeholder { color: var(--text-muted); }
-
-  /* ─── RUAS LIST ─── */
-  .ruas-list-header {
-    padding: 12px 20px 6px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .ruas-list-header span {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  #ruas-list-count {
-    font-size: 11px;
-    color: var(--text-muted);
-    background: var(--surface2);
-    padding: 2px 7px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-  }
-
-  #ruas-list-wrap {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 12px 12px;
-  }
-
-  #ruas-list-wrap::-webkit-scrollbar { width: 4px; }
-  #ruas-list-wrap::-webkit-scrollbar-track { background: transparent; }
-  #ruas-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  #ruas-list-wrap::-webkit-scrollbar-thumb:hover { background: var(--border-mid); }
-
-  .ruas-item {
-    display: flex;
-    align-items: center;
-    padding: 9px 10px;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: background 0.12s;
-    margin-bottom: 1px;
-    gap: 8px;
-    border: 1px solid transparent;
-  }
-
-  .ruas-item:hover { background: var(--surface2); border-color: var(--border); }
-
-  .ruas-item.active {
-    background: var(--accent-bg);
-    border-color: rgba(37,99,235,0.2);
-  }
-
-  .ruas-no {
-    font-family: 'Outfit', sans-serif;
-    font-size: 10.5px;
-    font-weight: 700;
-    color: var(--accent);
-    min-width: 34px;
-    flex-shrink: 0;
-    background: var(--accent-bg);
-    text-align: center;
-    padding: 2px 5px;
-    border-radius: 5px;
-    letter-spacing: 0.02em;
-  }
-
-  .ruas-item.active .ruas-no {
-    background: rgba(37,99,235,0.15);
-  }
-
-  .ruas-street {
-    flex: 1;
-    font-size: 12.5px;
-    color: var(--text);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ruas-badges {
-    display: flex;
-    gap: 3px;
-    flex-shrink: 0;
-  }
-
-  .ruas-badge {
-    font-size: 10.5px;
-    padding: 2px 6px;
-    border-radius: 5px;
-    font-weight: 700;
-    font-family: 'Outfit', sans-serif;
-  }
-
-  .ruas-badge.pju   { background: var(--pju-bg);   color: var(--pju-dark);   }
-  .ruas-badge.rambu { background: var(--rambu-bg);  color: var(--rambu-dark); }
-
-  /* ─── MAP ─── */
-  #map-wrap {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #map {
-    width: 100%;
-    height: 100%;
-    background: #e8eef4;
-  }
-
-  /* ─── SELECTED RUAS LABEL (floating over map) ─── */
-  #ruas-label {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    z-index: 900;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 8px 14px;
-    display: none;
-    align-items: center;
-    gap: 10px;
-    box-shadow: var(--shadow);
-  }
-
-  #ruas-label-no {
-    font-family: 'Outfit', sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--accent);
-    background: var(--accent-bg);
-    padding: 2px 7px;
-    border-radius: 5px;
-  }
-
-  #ruas-label-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  #ruas-label-close {
-    width: 20px;
-    height: 20px;
-    border-radius: 5px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: var(--text-sec);
-    line-height: 1;
-    transition: background 0.12s;
-    flex-shrink: 0;
-  }
-
-  #ruas-label-close:hover { background: var(--border); }
-
-  /* ─── COUNT BADGE ─── */
-  #count-badge {
-    position: absolute;
-    bottom: 28px;
-    right: 16px;
-    z-index: 900;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 8px 14px;
-    font-size: 12px;
-    color: var(--text-sec);
-    pointer-events: none;
-    box-shadow: var(--shadow);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  #count-badge strong {
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  #count-badge svg {
-    width: 14px; height: 14px;
-    stroke: var(--text-muted);
-    stroke-width: 2;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  /* ─── ATTRIBUTION FIX ─── */
-  .leaflet-bottom.leaflet-right { bottom: 28px; right: 170px; }
-
-  /* ─── POPUP ─── */
-  .leaflet-popup-content-wrapper {
-    background: var(--surface) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-lg) !important;
-    box-shadow: var(--shadow-lg) !important;
-    padding: 0 !important;
-    overflow: hidden;
-    min-width: 250px;
-    max-width: 290px;
-  }
-
-  .leaflet-popup-tip-container { display: none !important; }
-  .leaflet-popup-content { margin: 0 !important; width: 100% !important; }
-
-  .leaflet-popup-close-button {
-    top: 8px !important;
-    right: 10px !important;
-    color: var(--text-muted) !important;
-    font-size: 20px !important;
-    font-weight: 400 !important;
-    z-index: 10;
-    line-height: 1 !important;
-    background: rgba(255,255,255,0.9) !important;
-    border-radius: 5px !important;
-    width: 22px !important;
-    height: 22px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .popup-photo {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    display: block;
-    background: var(--surface2);
-  }
-
-  .popup-no-photo {
-    width: 100%;
-    height: 90px;
-    background: linear-gradient(135deg, var(--surface2), #e8eef9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    color: var(--text-muted);
-  }
-
-  .popup-body {
-    padding: 13px 16px 16px;
-  }
-
-  .popup-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .popup-badge {
-    font-size: 10px;
-    font-weight: 800;
-    font-family: 'Outfit', sans-serif;
-    letter-spacing: 0.06em;
-    padding: 2px 8px;
-    border-radius: 5px;
-  }
-
-  .popup-badge.PJU   { background: var(--pju-bg);   color: var(--pju-dark);   }
-  .popup-badge.RAMBU { background: var(--rambu-bg);  color: var(--rambu-dark); }
-
-  .popup-name {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--text);
-    margin-bottom: 7px;
-    line-height: 1.3;
-  }
-
-  .popup-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text-sec);
-  }
-
-  .popup-ruas-tag {
-    font-family: 'Outfit', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    background: var(--accent-bg);
-    color: var(--accent-dark);
-    padding: 2px 6px;
-    border-radius: 5px;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
-
-  /* ─── MARKER CLUSTER ─── */
-  .marker-cluster-small div,
-  .marker-cluster-medium div,
-  .marker-cluster-large div {
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 700 !important;
-  }
-
-  .marker-cluster-small  { background-color: rgba(245,158,11,0.18) !important; }
-  .marker-cluster-small div  { background-color: rgba(245,158,11,0.88) !important; color: #fff !important; }
-  .marker-cluster-medium { background-color: rgba(245,158,11,0.14) !important; }
-  .marker-cluster-medium div { background-color: rgba(245,158,11,0.80) !important; color: #fff !important; }
-  .marker-cluster-large  { background-color: rgba(245,158,11,0.10) !important; }
-  .marker-cluster-large div  { background-color: rgba(245,158,11,0.72) !important; color: #fff !important; }
-
-  /* ─── LEAFLET CONTROLS ─── */
-  .leaflet-control-zoom {
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius) !important;
-    overflow: hidden;
-    box-shadow: var(--shadow) !important;
-  }
-
-  .leaflet-control-zoom a {
-    background: var(--surface) !important;
-    color: var(--text-sec) !important;
-    border-color: var(--border) !important;
-    font-size: 16px !important;
-    width: 32px !important;
-    height: 32px !important;
-    line-height: 32px !important;
-    transition: background 0.12s, color 0.12s;
-  }
-
-  .leaflet-control-zoom a:hover {
-    background: var(--surface2) !important;
-    color: var(--accent) !important;
-  }
-
-  /* Mobile sidebar toggle */
-  #sidebar-toggle {
-    display: none;
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    z-index: 1000;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: var(--radius);
-    width: 38px;
-    height: 38px;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
-    box-shadow: var(--shadow);
-  }
-
-  @media (max-width: 680px) {
-    #sidebar {
-      position: absolute;
-      left: -340px;
-      top: var(--header-h);
-      bottom: 0;
-      z-index: 900;
-      transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
-      box-shadow: var(--shadow-lg);
-    }
-    #sidebar.open { left: 0; }
-    #sidebar-toggle { display: flex; }
-    :root { --sidebar-w: 300px; }
-    .header-right .stat-pill { display: none; }
-    .copyright { display: none; }
-    #ruas-label { top: auto; bottom: 70px; left: 60px; }
-  }
-
-  /* Loading shimmer */
-  @keyframes shimmer {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-  }
-  .loading { animation: shimmer 1.4s ease-in-out infinite; }
+:root {
+  --c-bg:        #f0f2f7;
+  --c-surf:      #ffffff;
+  --c-surf2:     #f7f8fc;
+  --c-surf3:     #eef0f7;
+  --c-border:    rgba(30,40,80,0.09);
+  --c-border2:   rgba(30,40,80,0.16);
+  --c-ink:       #111827;
+  --c-ink2:      #4b5675;
+  --c-ink3:      #8b93ae;
+  --c-pju:       #f59e0b;
+  --c-pju-lt:    #fef9ee;
+  --c-pju-bd:    rgba(245,158,11,0.3);
+  --c-pju-tx:    #854d0e;
+  --c-rambu:     #f43f5e;
+  --c-rambu-lt:  #fff1f3;
+  --c-rambu-bd:  rgba(244,63,94,0.3);
+  --c-rambu-tx:  #9f1239;
+  --c-blue:      #3b82f6;
+  --c-blue-lt:   #eff6ff;
+  --c-blue-bd:   rgba(59,130,246,0.25);
+  --c-blue-tx:   #1e40af;
+  --sw:          280px;
+  --hh:          56px;
+  --r:           8px;
+  --r2:          12px;
+  --r3:          16px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--c-bg);
+  color:var(--c-ink);
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ══ HEADER ══════════════════════════════════════════════════ */
+#hdr{
+  height:var(--hh);
+  background:var(--c-surf);
+  border-bottom:1px solid var(--c-border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  flex-shrink:0;
+  z-index:1000;
+  box-shadow:0 1px 0 var(--c-border),0 2px 8px rgba(17,24,39,0.04);
+}
+
+.hdr-brand{display:flex;align-items:center;gap:11px;}
+
+.hdr-icon{
+  width:34px;height:34px;
+  background:#1d4ed8;
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 1px 4px rgba(29,78,216,0.35),inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.hdr-icon svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+.hdr-name{
+  font-family:'Manrope',sans-serif;
+  font-size:14.5px;font-weight:800;
+  color:var(--c-ink);
+  letter-spacing:-0.02em;
+}
+.hdr-sub{font-size:11px;color:var(--c-ink3);font-weight:400;margin-top:1px;}
+
+.hdr-right{display:flex;align-items:center;gap:12px;}
+
+.kpi-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:4px 11px 4px 8px;
+  border-radius:20px;
+  font-size:12px;font-weight:500;
+  border:1px solid;
+  white-space:nowrap;
+  user-select:none;
+}
+.kpi-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.kpi-num{font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;}
+.kpi-pill.pju {background:var(--c-pju-lt);border-color:var(--c-pju-bd);color:var(--c-pju-tx);}
+.kpi-pill.rmb {background:var(--c-rambu-lt);border-color:var(--c-rambu-bd);color:var(--c-rambu-tx);}
+
+.hdr-copy{font-size:10.5px;color:var(--c-ink3);letter-spacing:0.01em;padding-left:8px;border-left:1px solid var(--c-border2);}
+
+/* ══ MAIN ════════════════════════════════════════════════════ */
+#main{display:flex;flex:1;overflow:hidden;}
+
+/* ══ SIDEBAR ═════════════════════════════════════════════════ */
+#sb{
+  width:var(--sw);
+  background:var(--c-surf);
+  border-right:1px solid var(--c-border);
+  display:flex;flex-direction:column;
+  flex-shrink:0;overflow:hidden;
+  z-index:500;
+}
+
+.sb-block{padding:12px 14px;border-bottom:1px solid var(--c-border);}
+
+.sb-label{
+  font-family:'Manrope',sans-serif;
+  font-size:10px;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--c-ink3);
+  margin-bottom:9px;
+}
+
+/* basemap switcher */
+.bm-row{display:flex;gap:6px;}
+.bm-btn{
+  flex:1;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:7px 0;
+  border-radius:var(--r);
+  border:1px solid var(--c-border2);
+  background:var(--c-surf2);
+  color:var(--c-ink2);
+  font-family:'Inter',sans-serif;
+  font-size:12px;font-weight:500;
+  cursor:pointer;
+  transition:all .14s;
+  white-space:nowrap;
+}
+.bm-btn:hover{border-color:var(--c-blue-bd);color:var(--c-ink);}
+.bm-btn.on{
+  background:var(--c-blue-lt);
+  border-color:var(--c-blue-bd);
+  color:var(--c-blue-tx);
+  font-weight:600;
+}
+.bm-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+/* layer rows — full width, no cramping */
+.lyr-row{display:flex;flex-direction:column;gap:6px;}
+.lyr-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;
+  border-radius:var(--r);
+  border:1px solid var(--c-border2);
+  background:var(--c-surf2);
+  cursor:pointer;user-select:none;
+  transition:all .14s;
+}
+.lyr-chip:hover{background:var(--c-surf);box-shadow:0 1px 6px rgba(17,24,39,0.07);}
+.lyr-chip.on.pju-chip {background:var(--c-pju-lt);border-color:var(--c-pju-bd);}
+.lyr-chip.on.rmb-chip {background:var(--c-rambu-lt);border-color:var(--c-rambu-bd);}
+
+.lyr-icon{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+}
+.pju-chip .lyr-icon{background:rgba(245,158,11,0.14);}
+.rmb-chip .lyr-icon{background:rgba(244,63,94,0.12);}
+
+.lyr-info{flex:1;min-width:0;}
+.lyr-name{font-size:12.5px;font-weight:600;color:var(--c-ink);line-height:1.25;}
+.lyr-desc{font-size:10.5px;color:var(--c-ink3);margin-top:1px;}
+
+.lyr-cnt{
+  font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;
+  padding:2px 8px;border-radius:20px;flex-shrink:0;
+  min-width:28px;text-align:center;
+}
+.pju-chip  .lyr-cnt{background:rgba(245,158,11,0.18);color:var(--c-pju-tx);}
+.rmb-chip  .lyr-cnt{background:rgba(244,63,94,0.14);color:var(--c-rambu-tx);}
+.lyr-chip:not(.on) .lyr-cnt{background:var(--c-surf3);color:var(--c-ink3);}
+
+/* toggle */
+.tog{
+  width:34px;height:19px;
+  background:var(--c-border2);
+  border-radius:10px;position:relative;
+  transition:background .18s;flex-shrink:0;
+}
+.tog::after{
+  content:'';position:absolute;
+  top:3px;left:3px;
+  width:13px;height:13px;
+  background:#fff;border-radius:50%;
+  box-shadow:0 1px 3px rgba(0,0,0,0.22);
+  transition:left .18s;
+}
+.pju-chip.on .tog{background:var(--c-pju);}
+.rmb-chip.on .tog{background:var(--c-rambu);}
+.lyr-chip.on .tog::after{left:18px;}
+
+/* search */
+.srch-wrap{position:relative;}
+.srch-wrap svg{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;
+  stroke:var(--c-ink3);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+  pointer-events:none;
+}
+#srch{
+  width:100%;
+  padding:8px 10px 8px 30px;
+  background:var(--c-surf2);
+  border:1px solid var(--c-border2);
+  border-radius:var(--r);
+  color:var(--c-ink);
+  font-family:'Inter',sans-serif;font-size:12.5px;
+  outline:none;
+  transition:all .14s;
+}
+#srch:focus{border-color:var(--c-blue);background:var(--c-surf);box-shadow:0 0 0 3px rgba(59,130,246,0.1);}
+#srch::placeholder{color:var(--c-ink3);}
+
+/* ruas list */
+.rl-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 4px;
+}
+.rl-hdr-lbl{font-family:'Manrope',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--c-ink3);}
+#rl-count{font-size:11px;color:var(--c-ink3);background:var(--c-surf3);padding:2px 8px;border-radius:20px;border:1px solid var(--c-border);}
+
+#rl-wrap{flex:1;overflow-y:auto;padding:4px 8px 12px;}
+#rl-wrap::-webkit-scrollbar{width:3px;}
+#rl-wrap::-webkit-scrollbar-track{background:transparent;}
+#rl-wrap::-webkit-scrollbar-thumb{background:var(--c-border2);border-radius:2px;}
+
+.ri{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 9px;
+  border-radius:var(--r);
+  cursor:pointer;
+  transition:background .11s;
+  margin-bottom:1px;
+  border:1px solid transparent;
+}
+.ri:hover{background:var(--c-surf2);}
+.ri.sel{background:var(--c-blue-lt);border-color:var(--c-blue-bd);}
+
+.ri-no{
+  font-family:'Manrope',sans-serif;font-size:10px;font-weight:700;
+  color:var(--c-blue-tx);background:var(--c-blue-lt);
+  padding:2px 6px;border-radius:5px;
+  min-width:36px;text-align:center;flex-shrink:0;
+  letter-spacing:0.02em;
+}
+.ri.sel .ri-no{background:rgba(59,130,246,0.18);}
+.ri-all .ri-no{min-width:auto;}
+
+.ri-street{
+  flex:1;font-size:12.5px;font-weight:500;color:var(--c-ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ri-tags{display:flex;gap:3px;flex-shrink:0;}
+.ri-tag{font-family:'Manrope',sans-serif;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:5px;}
+.ri-tag.p{background:rgba(245,158,11,0.12);color:var(--c-pju-tx);}
+.ri-tag.r{background:rgba(244,63,94,0.1);color:var(--c-rambu-tx);}
+
+/* ══ MAP ══════════════════════════════════════════════════════ */
+#map-w{flex:1;position:relative;overflow:hidden;}
+#map{width:100%;height:100%;background:#e8ecf2;}
+
+/* ══ FLOATING CHIPS ON MAP ════════════════════════════════════ */
+#filter-chip{
+  position:absolute;top:14px;left:14px;z-index:900;
+  background:var(--c-surf);border:1px solid var(--c-border2);
+  border-radius:var(--r2);
+  padding:8px 12px;
+  display:none;align-items:center;gap:10px;
+  box-shadow:0 2px 12px rgba(17,24,39,0.1);
+}
+.fc-tag{
+  font-family:'Manrope',sans-serif;font-size:10.5px;font-weight:700;
+  color:var(--c-blue-tx);background:var(--c-blue-lt);
+  padding:3px 8px;border-radius:5px;letter-spacing:0.04em;
+}
+.fc-name{font-size:13px;font-weight:600;color:var(--c-ink);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fc-close{
+  width:22px;height:22px;border-radius:6px;
+  background:var(--c-surf3);border:1px solid var(--c-border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--c-ink3);font-size:16px;line-height:1;
+  transition:background .12s;flex-shrink:0;
+}
+.fc-close:hover{background:var(--c-border2);}
+
+#cnt-badge{
+  position:absolute;bottom:24px;right:14px;z-index:900;
+  background:var(--c-surf);border:1px solid var(--c-border2);
+  border-radius:var(--r);
+  padding:7px 13px;
+  font-size:12px;color:var(--c-ink2);
+  pointer-events:none;
+  box-shadow:0 2px 10px rgba(17,24,39,0.08);
+  display:flex;align-items:center;gap:6px;
+}
+.cnt-n{font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;color:var(--c-ink);}
+
+/* ══ POPUP ════════════════════════════════════════════════════ */
+.leaflet-popup-content-wrapper{
+  background:var(--c-surf) !important;
+  border:1px solid var(--c-border2) !important;
+  border-radius:var(--r3) !important;
+  box-shadow:0 8px 30px rgba(17,24,39,0.13),0 2px 8px rgba(17,24,39,0.07) !important;
+  padding:0 !important;
+  overflow:hidden;
+  width:280px !important;
+}
+.leaflet-popup-tip-container{display:none !important;}
+.leaflet-popup-content{margin:0 !important;width:100% !important;}
+.leaflet-popup-close-button{
+  top:9px !important;right:9px !important;
+  color:rgba(255,255,255,0.9) !important;
+  font-size:18px !important;font-weight:500 !important;
+  z-index:10;line-height:1 !important;
+  width:24px !important;height:24px !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  background:rgba(0,0,0,0.25) !important;
+  border-radius:6px !important;
+  backdrop-filter:blur(4px) !important;
+  -webkit-backdrop-filter:blur(4px) !important;
+}
+.leaflet-popup-close-button:hover{background:rgba(0,0,0,0.45) !important;color:#fff !important;}
+
+/* Photo area — FIXED proper display */
+.pp-img-wrap{
+  width:100%;
+  height:180px;
+  overflow:hidden;
+  position:relative;
+  background:var(--c-surf3);
+  display:flex;align-items:center;justify-content:center;
+}
+.pp-img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  display:block;
+}
+.pp-noimg{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;
+  background:linear-gradient(135deg,#f0f4ff,#e8edf8);
+}
+/* gradient overlay on photo for badge readability */
+.pp-img-wrap::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.18) 0%,transparent 45%);
+  pointer-events:none;
+}
+
+.pp-body{padding:13px 15px 15px;}
+
+.pp-meta-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.pp-badge{
+  font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;
+  letter-spacing:0.07em;padding:3px 8px;border-radius:5px;
+}
+.pp-badge.PJU  {background:var(--c-pju-lt);color:var(--c-pju-tx);border:1px solid var(--c-pju-bd);}
+.pp-badge.RAMBU{background:var(--c-rambu-lt);color:var(--c-rambu-tx);border:1px solid var(--c-rambu-bd);}
+
+.pp-ruas{
+  font-family:'Manrope',sans-serif;font-size:10px;font-weight:700;
+  background:var(--c-blue-lt);color:var(--c-blue-tx);
+  padding:3px 7px;border-radius:5px;border:1px solid var(--c-blue-bd);
+}
+
+.pp-name{
+  font-family:'Manrope',sans-serif;font-size:14.5px;font-weight:800;
+  color:var(--c-ink);line-height:1.3;margin-bottom:5px;
+}
+.pp-street{
+  font-size:12px;color:var(--c-ink2);
+  display:flex;align-items:flex-start;gap:5px;line-height:1.4;
+}
+.pp-street-ico{margin-top:1px;flex-shrink:0;opacity:.6;font-size:11px;}
+
+/* ══ CLUSTERS ════════════════════════════════════════════════ */
+.marker-cluster div{font-family:'Manrope',sans-serif !important;font-weight:800 !important;}
+.marker-cluster-small      {background-color:rgba(245,158,11,0.18) !important;}
+.marker-cluster-small  div {background-color:rgba(245,158,11,0.9)  !important;color:#fff !important;}
+.marker-cluster-medium     {background-color:rgba(245,158,11,0.14) !important;}
+.marker-cluster-medium div {background-color:rgba(245,158,11,0.82) !important;color:#fff !important;}
+.marker-cluster-large      {background-color:rgba(245,158,11,0.10) !important;}
+.marker-cluster-large  div {background-color:rgba(245,158,11,0.75) !important;color:#fff !important;}
+
+/* ══ LEAFLET CONTROLS ════════════════════════════════════════ */
+.leaflet-control-zoom{
+  border:1px solid var(--c-border2) !important;
+  border-radius:var(--r) !important;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(17,24,39,0.08) !important;
+}
+.leaflet-control-zoom a{
+  background:var(--c-surf) !important;
+  color:var(--c-ink2) !important;
+  border-color:var(--c-border) !important;
+  width:30px !important;height:30px !important;line-height:30px !important;
+  font-size:17px !important;
+  transition:all .12s;
+}
+.leaflet-control-zoom a:hover{background:var(--c-surf2) !important;color:var(--c-blue) !important;}
+
+/* ══ MOBILE ══════════════════════════════════════════════════ */
+#mob-toggle{
+  display:none;
+  position:absolute;top:14px;left:14px;z-index:1000;
+  background:var(--c-surf);border:1px solid var(--c-border2);
+  color:var(--c-ink);border-radius:var(--r);
+  width:38px;height:38px;
+  align-items:center;justify-content:center;
+  cursor:pointer;font-size:17px;
+  box-shadow:0 2px 8px rgba(17,24,39,0.1);
+}
+
+@media(max-width:680px){
+  #sb{
+    position:absolute;left:calc(-1 * var(--sw));
+    top:var(--hh);bottom:0;
+    z-index:900;
+    transition:left .25s cubic-bezier(.4,0,.2,1);
+    box-shadow:4px 0 20px rgba(17,24,39,0.12);
+  }
+  #sb.open{left:0;}
+  #mob-toggle{display:flex;}
+  .kpi-pill{display:none;}
+  .hdr-copy{display:none;}
+  #filter-chip{top:auto;bottom:68px;left:56px;}
+}
 </style>
 </head>
 <body>
 
-<!-- ─── HEADER ─── -->
-<div id="header">
-  <div class="header-left">
-    <div class="header-logo-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7z"/>
-        <circle cx="12" cy="9" r="2.5"/>
-      </svg>
+<!-- ═══ HEADER ═══════════════════════════════════════════════ -->
+<div id="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
     </div>
-    <div class="header-title-group">
-      <div class="header-title">WebGIS Inventarisasi Aset Jalan</div>
-      <div class="header-subtitle">Sistem Informasi Geografis Aset Infrastruktur</div>
+    <div>
+      <div class="hdr-name">WebGIS Inventarisasi Aset Jalan</div>
+      <div class="hdr-sub">Sistem Informasi Geografis Aset Infrastruktur</div>
     </div>
   </div>
-
-  <div class="header-right">
-    <div id="stats-bar">
-      <div class="stat-pill pju">
-        <div class="stat-dot" style="background:var(--pju)"></div>
-        PJU
-        <span class="count" id="stat-pju">—</span>
-      </div>
-      <div class="stat-pill rambu">
-        <div class="stat-dot" style="background:var(--rambu)"></div>
-        Rambu
-        <span class="count" id="stat-rambu">—</span>
-      </div>
+  <div class="hdr-right">
+    <div class="kpi-pill pju">
+      <div class="kpi-dot" style="background:var(--c-pju)"></div>
+      PJU <span class="kpi-num" id="h-pju">—</span>
     </div>
-    <span class="copyright">&copy; Bobby</span>
+    <div class="kpi-pill rmb">
+      <div class="kpi-dot" style="background:var(--c-rambu)"></div>
+      Rambu <span class="kpi-num" id="h-rmb">—</span>
+    </div>
+    <div class="hdr-copy">© Bobby</div>
   </div>
 </div>
 
-<!-- ─── MAIN ─── -->
+<!-- ═══ BODY ══════════════════════════════════════════════════ -->
 <div id="main">
 
   <!-- ─── SIDEBAR ─── -->
-  <div id="sidebar">
+  <div id="sb">
 
-    <div class="sidebar-header">
-      <h2>Peta Kontrol</h2>
-
-      <!-- Basemap tabs -->
-      <div class="basemap-tabs">
-        <button class="basemap-tab active" id="btn-osm" onclick="setBasemap('osm')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <div class="sb-block">
+      <div class="sb-label">Basemap</div>
+      <div class="bm-row">
+        <button class="bm-btn on" id="bm-osm" onclick="setBasemap('osm')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
           Peta Jalan
         </button>
-        <button class="basemap-tab" id="btn-satellite" onclick="setBasemap('satellite')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <button class="bm-btn" id="bm-sat" onclick="setBasemap('sat')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           Satelit
         </button>
       </div>
+    </div>
 
-      <!-- Layer toggles -->
-      <div class="layers-row">
-        <div class="layer-chip pju-chip active" id="chip-pju" onclick="toggleLayer('pju')">
-          <div class="layer-chip-icon">💡</div>
-          <div>
-            <div class="layer-chip-label">PJU <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'Outfit',sans-serif" id="count-pju-chip">—</span></div>
-            <div class="layer-chip-sub">Penerangan</div>
+    <div class="sb-block">
+      <div class="sb-label">Layer Data</div>
+      <div class="lyr-row">
+        <div class="lyr-chip pju-chip on" id="lc-pju" onclick="toggleLayer('pju')">
+          <div class="lyr-icon">💡</div>
+          <div class="lyr-info">
+            <div class="lyr-name">PJU</div>
+            <div class="lyr-desc">Penerangan</div>
           </div>
-          <div class="layer-chip-toggle" id="sw-pju"></div>
+          <span class="lyr-cnt" id="lc-pju-n">—</span>
+          <div class="tog"></div>
         </div>
-
-        <div class="layer-chip rambu-chip active" id="chip-rambu" onclick="toggleLayer('rambu')">
-          <div class="layer-chip-icon">🚦</div>
-          <div>
-            <div class="layer-chip-label">Rambu <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'Outfit',sans-serif" id="count-rambu-chip">—</span></div>
-            <div class="layer-chip-sub">Lalu Lintas</div>
+        <div class="lyr-chip rmb-chip on" id="lc-rmb" onclick="toggleLayer('rmb')">
+          <div class="lyr-icon">🚦</div>
+          <div class="lyr-info">
+            <div class="lyr-name">Rambu</div>
+            <div class="lyr-desc">Lalu Lintas</div>
           </div>
-          <div class="layer-chip-toggle" id="sw-rambu"></div>
+          <span class="lyr-cnt" id="lc-rmb-n">—</span>
+          <div class="tog"></div>
         </div>
       </div>
     </div>
 
-    <!-- Search -->
-    <div class="search-wrap">
-      <div class="search-inner">
+    <div class="sb-block">
+      <div class="sb-label">Cari Ruas</div>
+      <div class="srch-wrap">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="search-input" placeholder="Cari nama jalan atau nomor ruas…" oninput="filterRuas(this.value)">
+        <input id="srch" type="text" placeholder="Nama jalan atau nomor ruas…" oninput="filterRuas(this.value)">
       </div>
     </div>
 
-    <!-- Ruas list header -->
-    <div class="ruas-list-header">
-      <span>Daftar Ruas</span>
-      <span id="ruas-list-count">—</span>
+    <div class="rl-hdr">
+      <span class="rl-hdr-lbl">Daftar Ruas</span>
+      <span id="rl-count">—</span>
     </div>
 
-    <!-- Ruas list -->
-    <div id="ruas-list-wrap">
-      <div id="ruas-list"></div>
-    </div>
+    <div id="rl-wrap"><div id="rl"></div></div>
 
   </div><!-- /sidebar -->
 
-  <!-- ─── MAP AREA ─── -->
-  <div id="map-wrap">
+  <!-- ─── MAP ─── -->
+  <div id="map-w">
     <div id="map"></div>
 
-    <!-- Selected ruas label -->
-    <div id="ruas-label">
-      <span id="ruas-label-no"></span>
-      <span id="ruas-label-name"></span>
-      <div id="ruas-label-close" onclick="selectRuas(null)" title="Tampilkan semua">×</div>
+    <div id="filter-chip">
+      <span class="fc-tag" id="fc-no"></span>
+      <span class="fc-name" id="fc-name"></span>
+      <div class="fc-close" onclick="selectRuas(null)" title="Tampilkan semua">×</div>
     </div>
 
-    <!-- Visible count badge -->
-    <div id="count-badge">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2C8 2 4.5 5 3 9a12 12 0 0 0 0 6c1.5 4 5 7 9 7s7.5-3 9-7a12 12 0 0 0 0-6C19.5 5 16 2 12 2z"/></svg>
-      <strong id="visible-count">—</strong> titik ditampilkan
+    <div id="cnt-badge">
+      <span class="cnt-n" id="cnt-n">—</span> titik ditampilkan
     </div>
   </div>
 
-</div><!-- /main -->
+</div>
 
-<!-- Mobile toggle -->
-<button id="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<button id="mob-toggle" onclick="document.getElementById('sb').classList.toggle('open')">☰</button>
 
 <script src="data.js"></script>
 <script>
-// ─── MAP INIT ─────────────────────────────────────────────────
-const map = L.map('map', {
-  center: [-7.6433, 110.8366],
-  zoom: 13,
-  zoomControl: true,
-  attributionControl: true
-});
-
+/* ── MAP ─────────────────────────────────────────────────── */
+const map = L.map('map',{center:[-7.6433,110.8366],zoom:13,zoomControl:true});
 map.zoomControl.setPosition('bottomright');
 
-const basemaps = {
-  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-    maxZoom: 19
-  }),
-  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '&copy; Esri, Maxar, GeoEye',
-    maxZoom: 19
-  })
+const tiles = {
+  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19}),
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+    attribution:'&copy; Esri, Maxar',maxZoom:19})
 };
+tiles.osm.addTo(map);
+let curTile='osm';
 
-basemaps.osm.addTo(map);
-let currentBasemap = 'osm';
-
-// ─── ICONS ────────────────────────────────────────────────────
-function makeIcon(type) {
-  const isPJU = type === 'PJU';
-  const bg    = isPJU ? '#f59e0b' : '#ef4444';
-  const emoji = isPJU ? '💡' : '🚦';
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="38" viewBox="0 0 30 38">
+/* ── ICONS ───────────────────────────────────────────────── */
+function mkIcon(type){
+  const isPJU=type==='PJU';
+  const col=isPJU?'#f59e0b':'#f43f5e';
+  const em=isPJU?'💡':'🚦';
+  const s=`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
     <defs>
-      <filter id="sh${type}" x="-30%" y="-20%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="rgba(0,0,0,0.25)" flood-opacity="1"/>
-      </filter>
+      <filter id="d${type}"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.22)"/></filter>
+      <filter id="i${type}"><feDropShadow dx="0" dy="0" stdDeviation="1" flood-color="rgba(255,255,255,0.6)"/></filter>
     </defs>
-    <path filter="url(#sh${type})"
-      d="M15 1C7.82 1 2 6.82 2 14c0 8.28 11.09 20.5 12.36 21.9a.87.87 0 0 0 1.28 0C16.91 34.5 28 22.28 28 14 28 6.82 22.18 1 15 1z"
-      fill="${bg}" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-    <circle cx="15" cy="14" r="9" fill="rgba(255,255,255,0.15)"/>
-    <text x="15" y="19" text-anchor="middle" font-size="12">${emoji}</text>
+    <path filter="url(#d${type})"
+      d="M16 1.5C9.1 1.5 3.5 7.1 3.5 14c0 8.8 11.5 21.5 11.5 21.5l1 1.2 1-1.2S28.5 22.8 28.5 14c0-6.9-5.6-12.5-12.5-12.5z"
+      fill="${col}" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+    <circle cx="16" cy="14" r="8.5" fill="rgba(255,255,255,0.13)"/>
+    <text x="16" y="18.5" text-anchor="middle" font-size="12" filter="url(#i${type})">${em}</text>
   </svg>`;
-
-  return L.divIcon({
-    html: svg,
-    iconSize: [30, 38],
-    iconAnchor: [15, 38],
-    popupAnchor: [0, -38],
-    className: ''
-  });
+  return L.divIcon({html:s,iconSize:[32,40],iconAnchor:[16,40],popupAnchor:[0,-40],className:''});
 }
+const ICONS={PJU:mkIcon('PJU'),RAMBU:mkIcon('RAMBU')};
 
-const icons = { PJU: makeIcon('PJU'), RAMBU: makeIcon('RAMBU') };
-
-// ─── CLUSTERS ─────────────────────────────────────────────────
-const clusters = {
-  pju:   L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 55, spiderfyOnMaxZoom: true }),
-  rambu: L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 55, spiderfyOnMaxZoom: true })
+/* ── CLUSTERS ────────────────────────────────────────────── */
+const CL={
+  pju:L.markerClusterGroup({chunkedLoading:true,maxClusterRadius:55,spiderfyOnMaxZoom:true}),
+  rmb:L.markerClusterGroup({chunkedLoading:true,maxClusterRadius:55,spiderfyOnMaxZoom:true})
 };
+const VIS={pju:true,rmb:true};
+let activeRuas=null;
 
-const layerVisible = { pju: true, rambu: true };
-let activeRuas = null;
+const byRuas={};
+FEATURES.forEach(f=>{if(!byRuas[f.ruas_no])byRuas[f.ruas_no]=[];byRuas[f.ruas_no].push(f);});
 
-// ─── BY-RUAS INDEX ────────────────────────────────────────────
-const byRuas = {};
-FEATURES.forEach(f => {
-  if (!byRuas[f.ruas_no]) byRuas[f.ruas_no] = [];
-  byRuas[f.ruas_no].push(f);
-});
-
-// ─── POPUP BUILDER ────────────────────────────────────────────
-function buildPopup(f) {
-  const media = f.img
-    ? `<img class="popup-photo" src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.style.display='none'">`
-    : `<div class="popup-no-photo">${f.type === 'PJU' ? '💡' : '🚦'}</div>`;
-
+/* ── POPUP ───────────────────────────────────────────────── */
+function popup(f){
+  const img=f.img
+    ?`<img class="pp-img" src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentNode.classList.add('err');this.style.display='none'">`
+    :`<div class="pp-noimg">${f.type==='PJU'?'💡':'🚦'}</div>`;
   return `
-    ${media}
-    <div class="popup-body">
-      <div class="popup-header">
-        <span class="popup-badge ${f.type}">${f.type}</span>
+    <div class="pp-img-wrap">${img}</div>
+    <div class="pp-body">
+      <div class="pp-meta-row">
+        <span class="pp-badge ${f.type}">${f.type}</span>
+        <span class="pp-ruas">${f.ruas_no}</span>
       </div>
-      <div class="popup-name">${f.name}</div>
-      <div class="popup-meta">
-        <span class="popup-ruas-tag">${f.ruas_no}</span>
+      <div class="pp-name">${f.name}</div>
+      <div class="pp-street">
+        <span class="pp-street-ico">📍</span>
         <span>${f.street}</span>
       </div>
     </div>`;
 }
 
-// ─── LOAD MARKERS ─────────────────────────────────────────────
-function loadMarkers(featureList) {
-  clusters.pju.clearLayers();
-  clusters.rambu.clearLayers();
-
-  featureList.forEach(f => {
-    const m = L.marker([f.lat, f.lon], { icon: icons[f.type] });
-    m.bindPopup(buildPopup(f), { maxWidth: 290 });
-    clusters[f.type.toLowerCase()].addLayer(m);
+/* ── MARKERS ─────────────────────────────────────────────── */
+function loadMarkers(list){
+  CL.pju.clearLayers(); CL.rmb.clearLayers();
+  list.forEach(f=>{
+    const k=f.type==='PJU'?'pju':'rmb';
+    const m=L.marker([f.lat,f.lon],{icon:ICONS[f.type]});
+    m.bindPopup(popup(f),{maxWidth:280,className:''});
+    CL[k].addLayer(m);
   });
-
-  updateCounts(featureList);
+  updateCount(list);
 }
 
-function refreshMap() {
-  const list = activeRuas
-    ? FEATURES.filter(f => f.ruas_no === activeRuas)
-    : FEATURES;
+function refreshMap(){
+  const list=activeRuas?FEATURES.filter(f=>f.ruas_no===activeRuas):FEATURES;
   loadMarkers(list);
-
-  ['pju', 'rambu'].forEach(k => {
-    if (layerVisible[k]) { if (!map.hasLayer(clusters[k])) map.addLayer(clusters[k]); }
-    else                  { if (map.hasLayer(clusters[k]))  map.removeLayer(clusters[k]); }
+  ['pju','rmb'].forEach(k=>{
+    if(VIS[k]){if(!map.hasLayer(CL[k]))map.addLayer(CL[k]);}
+    else{if(map.hasLayer(CL[k]))map.removeLayer(CL[k]);}
   });
 }
 
-function updateCounts(list) {
-  const pju   = list.filter(f => f.type === 'PJU').length;
-  const rambu = list.filter(f => f.type === 'RAMBU').length;
-  document.getElementById('stat-pju').textContent   = pju;
-  document.getElementById('stat-rambu').textContent = rambu;
-  document.getElementById('count-pju-chip').textContent   = pju;
-  document.getElementById('count-rambu-chip').textContent = rambu;
-  document.getElementById('visible-count').textContent    = pju + rambu;
+function updateCount(list){
+  const p=list.filter(f=>f.type==='PJU').length;
+  const r=list.filter(f=>f.type==='RAMBU').length;
+  document.getElementById('h-pju').textContent=p;
+  document.getElementById('h-rmb').textContent=r;
+  document.getElementById('lc-pju-n').textContent=p;
+  document.getElementById('lc-rmb-n').textContent=r;
+  document.getElementById('cnt-n').textContent=p+r;
 }
 
-// ─── LAYER TOGGLES ────────────────────────────────────────────
-function toggleLayer(key) {
-  layerVisible[key] = !layerVisible[key];
-  const chip = document.getElementById(`chip-${key}`);
-  chip.classList.toggle('active', layerVisible[key]);
-  if (layerVisible[key]) map.addLayer(clusters[key]);
-  else                   map.removeLayer(clusters[key]);
+/* ── LAYER TOGGLE ────────────────────────────────────────── */
+function toggleLayer(k){
+  VIS[k]=!VIS[k];
+  document.getElementById(`lc-${k}`).classList.toggle('on',VIS[k]);
+  VIS[k]?map.addLayer(CL[k]):map.removeLayer(CL[k]);
 }
 
-// ─── BASEMAP ──────────────────────────────────────────────────
-function setBasemap(name) {
-  map.removeLayer(basemaps[currentBasemap]);
-  basemaps[name].addTo(map);
-  basemaps[name].bringToBack();
-  currentBasemap = name;
-  document.querySelectorAll('.basemap-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(name === 'osm' ? 'btn-osm' : 'btn-satellite').classList.add('active');
+/* ── BASEMAP ─────────────────────────────────────────────── */
+function setBasemap(n){
+  map.removeLayer(tiles[curTile]);
+  tiles[n].addTo(map);tiles[n].bringToBack();curTile=n;
+  document.querySelectorAll('.bm-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(n==='osm'?'bm-osm':'bm-sat').classList.add('on');
 }
 
-// ─── RUAS LIST ────────────────────────────────────────────────
-function buildRuasList(list) {
-  const container = document.getElementById('ruas-list');
-  container.innerHTML = '';
+/* ── RUAS LIST ───────────────────────────────────────────── */
+function buildList(list){
+  const c=document.getElementById('rl');c.innerHTML='';
+  document.getElementById('rl-count').textContent=(list.length+(activeRuas?'':'+1'))+' ruas';
 
-  document.getElementById('ruas-list-count').textContent = list.length + (activeRuas ? '' : '+1') + ' ruas';
+  const all=document.createElement('div');
+  all.className='ri ri-all'+(activeRuas===null?' sel':'');
+  const tp=FEATURES.filter(f=>f.type==='PJU').length;
+  const tr=FEATURES.filter(f=>f.type==='RAMBU').length;
+  all.innerHTML=`<span class="ri-no">ALL</span><span class="ri-street">Semua Ruas</span>
+    <span class="ri-tags"><span class="ri-tag p">${tp}</span><span class="ri-tag r">${tr}</span></span>`;
+  all.onclick=()=>selectRuas(null);
+  c.appendChild(all);
 
-  // "All" entry
-  const allEl = document.createElement('div');
-  allEl.className = 'ruas-item' + (activeRuas === null ? ' active' : '');
-  allEl.innerHTML = `
-    <span class="ruas-no" style="background:var(--accent-bg);color:var(--accent);min-width:34px">ALL</span>
-    <span class="ruas-street">Semua Ruas</span>
-    <span class="ruas-badges">
-      <span class="ruas-badge pju">${FEATURES.filter(f=>f.type==='PJU').length}</span>
-      <span class="ruas-badge rambu">${FEATURES.filter(f=>f.type==='RAMBU').length}</span>
-    </span>`;
-  allEl.addEventListener('click', () => selectRuas(null));
-  container.appendChild(allEl);
-
-  list.forEach(r => {
-    const feats     = byRuas[r.no] || [];
-    const pjuCnt   = feats.filter(f => f.type === 'PJU').length;
-    const rambuCnt = feats.filter(f => f.type === 'RAMBU').length;
-
-    const el = document.createElement('div');
-    el.className = 'ruas-item' + (activeRuas === r.no ? ' active' : '');
-    el.dataset.ruasNo = r.no;
-    el.innerHTML = `
-      <span class="ruas-no">${r.no}</span>
-      <span class="ruas-street" title="${r.street}">${r.street}</span>
-      <span class="ruas-badges">
-        ${pjuCnt   ? `<span class="ruas-badge pju">${pjuCnt}</span>`   : ''}
-        ${rambuCnt ? `<span class="ruas-badge rambu">${rambuCnt}</span>` : ''}
+  list.forEach(r=>{
+    const fs=byRuas[r.no]||[];
+    const p=fs.filter(f=>f.type==='PJU').length;
+    const rb=fs.filter(f=>f.type==='RAMBU').length;
+    const el=document.createElement('div');
+    el.className='ri'+(activeRuas===r.no?' sel':'');
+    el.dataset.no=r.no;
+    el.innerHTML=`<span class="ri-no">${r.no}</span>
+      <span class="ri-street" title="${r.street}">${r.street}</span>
+      <span class="ri-tags">
+        ${p?`<span class="ri-tag p">${p}</span>`:''}
+        ${rb?`<span class="ri-tag r">${rb}</span>`:''}
       </span>`;
-    el.addEventListener('click', () => selectRuas(r.no, r.street));
-    container.appendChild(el);
+    el.onclick=()=>selectRuas(r.no,r.street);
+    c.appendChild(el);
   });
 }
 
-function filterRuas(query) {
-  const q = query.trim().toLowerCase();
-  buildRuasList(q
-    ? RUAS_LIST.filter(r => r.street.toLowerCase().includes(q) || r.no.includes(q))
-    : RUAS_LIST
-  );
+function filterRuas(q){
+  q=q.trim().toLowerCase();
+  buildList(q?RUAS_LIST.filter(r=>r.street.toLowerCase().includes(q)||r.no.includes(q)):RUAS_LIST);
 }
 
-function selectRuas(ruasNo, streetName) {
-  activeRuas = ruasNo;
-
-  document.querySelectorAll('.ruas-item').forEach(el => {
-    el.classList.toggle('active',
-      ruasNo === null ? el.dataset.ruasNo === undefined : el.dataset.ruasNo === ruasNo
-    );
+function selectRuas(no,name){
+  activeRuas=no;
+  document.querySelectorAll('.ri').forEach(el=>{
+    el.classList.toggle('sel',no===null?el.dataset.no===undefined:el.dataset.no===no);
   });
-
-  const label = document.getElementById('ruas-label');
-  if (ruasNo) {
-    document.getElementById('ruas-label-no').textContent   = ruasNo;
-    document.getElementById('ruas-label-name').textContent = streetName;
-    label.style.display = 'flex';
-
-    const feats = byRuas[ruasNo] || [];
-    if (feats.length) {
-      const lats = feats.map(f => f.lat), lons = feats.map(f => f.lon);
+  const chip=document.getElementById('filter-chip');
+  if(no){
+    document.getElementById('fc-no').textContent=no;
+    document.getElementById('fc-name').textContent=name;
+    chip.style.display='flex';
+    const fs=byRuas[no]||[];
+    if(fs.length){
+      const lts=fs.map(f=>f.lat),lns=fs.map(f=>f.lon);
       map.flyToBounds(
-        [[Math.min(...lats)-.001, Math.min(...lons)-.001],
-         [Math.max(...lats)+.001, Math.max(...lons)+.001]],
-        { padding: [48, 48], duration: 0.8 }
-      );
+        [[Math.min(...lts)-.001,Math.min(...lns)-.001],[Math.max(...lts)+.001,Math.max(...lns)+.001]],
+        {padding:[52,52],duration:0.8});
     }
-  } else {
-    label.style.display = 'none';
-    map.flyTo([-7.6433, 110.8366], 13, { duration: 0.8 });
+  }else{
+    chip.style.display='none';
+    map.flyTo([-7.6433,110.8366],13,{duration:0.8});
   }
-
   refreshMap();
-  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb').classList.remove('open');
 }
 
-// ─── INIT ─────────────────────────────────────────────────────
-buildRuasList(RUAS_LIST);
+/* ── INIT ────────────────────────────────────────────────── */
+buildList(RUAS_LIST);
 refreshMap();
-map.addLayer(clusters.pju);
-map.addLayer(clusters.rambu);
+map.addLayer(CL.pju);
+map.addLayer(CL.rmb);
 </script>
 </body>
 </html>
